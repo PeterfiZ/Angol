@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Angol Nyelvtanuló Alkalmazás</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+        h1, h2 { color: #333; }
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+            width: 100%;
+            max-width: 300px;
+        }
+        .btn:hover { background-color: #45a049; }
+        .btn-option {
+            background-color: white;
+            color: #333;
+            border: 2px solid #4CAF50;
+        }
+        .btn-option:hover { background-color: #e8f5e9; }
+        .hidden { display: none; }
+        #feedback { margin-top: 15px; font-weight: bold; min-height: 24px; }
+        .correct { color: green; }
+        .wrong { color: red; }
+        .progress { margin-top: 10px; color: #666; font-size: 0.9em; }
+        .reading-text {
+            font-size: 1.15em;
+            line-height: 1.6;
+            text-align: left;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 5px solid #4CAF50;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+        }
+        .timer-bar-container { width: 100%; background-color: #e0e0e0; border-radius: 5px; height: 12px; margin-top: 15px; overflow: hidden; }
+        .timer-bar { height: 100%; background-color: #4CAF50; width: 0%; transition: width 0.1s linear; }
+        .reading-controls { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+        .vocab-table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: left; font-size: 0.9em; }
+        .vocab-table th, .vocab-table td { padding: 8px; border-bottom: 1px solid #eee; }
+        .vocab-table th { background-color: #f8f9fa; color: #444; }
+        .vocab-level-header { background-color: #4CAF50; color: white; padding: 8px 12px; margin-top: 20px; border-radius: 4px; font-weight: bold; text-align: left; }
+    </style>
+</head>
+<body>
+
+    <!-- Főmenü -->
+    <div class="container" id="menu">
+        <h1>Angol Gyakorló</h1>
+        <p>Válassz szintet a kezdéshez:</p>
+        <div style="margin-bottom: 15px;">
+            <label style="font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <input type="checkbox" id="hard-mode" style="width: 18px; height: 18px;"> Nehéz mód (10 mp) 🔥
+            </label>
+        </div>
+        <button class="btn" onclick="startLevel('A1')">A1 - Kezdő</button>
+        <button class="btn" onclick="startLevel('A2')">A2 - Alapfok</button>
+        <button class="btn" onclick="startLevel('B1')">B1 - Középfok (Eleje)</button>
+        <button class="btn" onclick="startLevel('B2')">B2 - Középfok (Vége)</button>
+
+        <h3 style="margin-top: 25px; color: #444;">📖 1 Perces Olvasási Gyakorlat</h3>
+        <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+            <button class="btn" style="width: auto; min-width: 60px;" onclick="startReading('A1')">A1</button>
+            <button class="btn" style="width: auto; min-width: 60px;" onclick="startReading('A2')">A2</button>
+            <button class="btn" style="width: auto; min-width: 60px;" onclick="startReading('B1')">B1</button>
+            <button class="btn" style="width: auto; min-width: 60px;" onclick="startReading('B2')">B2</button>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <button class="btn" style="background-color: #008CBA;" onclick="showVocabulary()">📚 Szókincs Tár</button>
+        </div>
+
+        <div id="stats" style="margin-top: 25px; text-align: left; border-top: 1px solid #eee; padding-top: 15px;">
+            <h3 style="font-size: 1.1em; margin-bottom: 10px; color: #444;">🏆 Eredményeim</h3>
+            <ul id="stats-list" style="list-style: none; padding: 0; font-size: 0.95em; color: #666;">
+                <li>Még nincs mentett eredmény.</li>
+            </ul>
+            <button onclick="clearStats()" style="background: none; border: none; color: #999; font-size: 0.8em; cursor: pointer; margin-top: 5px; text-decoration: underline;">Statisztika törlése</button>
+        </div>
+    </div>
+
+    <!-- Kvíz felület -->
+    <div class="container hidden" id="quiz">
+        <h2 id="level-title">Szint</h2>
+        <p class="progress">Kérdés: <span id="q-num">1</span> | Pontszám: <span id="score-display">0</span> | Idő: <span id="timer">30</span>mp</p>
+        <div style="margin: 30px 0; display: flex; justify-content: center; align-items: center; gap: 10px;">
+            <h3 id="question-text" style="margin: 0;">Kérdés helye</h3>
+            <button onclick="speakCurrentQuestion()" style="background: none; border: none; cursor: pointer; font-size: 1.5em;" title="Kiejtés">🔊</button>
+        </div>
+        <div id="options-container"></div>
+        <p id="feedback"></p>
+        <button class="btn hidden" id="next-btn" onclick="nextQuestion()">Következő</button>
+        <button class="btn" style="background-color: #777; margin-top: 20px;" onclick="showMenu()">Vissza a menübe</button>
+    </div>
+
+    <!-- Olvasás felület -->
+    <div class="container hidden" id="reading-practice">
+        <h2 id="reading-level-title">Olvasás</h2>
+        <p style="color: #666; font-size: 0.9em;">Olvasd a szöveget hangosan. A csík mutatja az ajánlott 1 perces tempót.</p>
+        
+        <div id="reading-content" class="reading-text"></div>
+        
+        <div class="timer-bar-container">
+            <div id="reading-progress" class="timer-bar"></div>
+        </div>
+        
+        <div class="reading-controls">
+            <button class="btn" onclick="speakReadingText()" style="background-color: #FF9800;">🔊 Felolvasás</button>
+            <button class="btn" id="start-reading-btn" onclick="startReadingTimer()">⏱️ Indítás</button>
+            <button class="btn hidden" id="new-text-btn" onclick="loadNewReadingText()">🔄 Új szöveg</button>
+        </div>
+        <button class="btn" style="background-color: #777; margin-top: 20px;" onclick="showMenu()">Vissza a menübe</button>
+    </div>
+
+    <!-- Szókincs felület -->
+    <div class="container hidden" id="vocabulary-view" style="max-width: 800px;">
+        <h2>Szókincs és Nyelvtan</h2>
+        <div id="vocab-content" style="max-height: 60vh; overflow-y: auto; padding-right: 5px;"></div>
+        <button class="btn" style="background-color: #777; margin-top: 20px;" onclick="showMenu()">Vissza a menübe</button>
+    </div>
+
+    <script>
+        // Adatbázis a szintekhez (bővíthető)
+        const database = {
+            'A1': [
+                { q: "Apple", options: ["Körte", "Alma", "Szőlő"], a: 1 },
+                { q: "Good morning", options: ["Jó reggelt", "Jó estét", "Viszlát"], a: 0 },
+                { q: "I am happy", options: ["Éhes vagyok", "Boldog vagyok", "Fáradt vagyok"], a: 1 },
+                { q: "Red", options: ["Kék", "Piros", "Zöld"], a: 1 },
+                { q: "Thank you", options: ["Kérem", "Köszönöm", "Bocsánat"], a: 1 },
+                { q: "Where is the station?", options: ["Hol van az állomás?", "Mikor indul a vonat?", "Ez az állomás?"], a: 0 },
+                { q: "Blue", options: ["Sárga", "Kék", "Fekete"], a: 1 },
+                { q: "Dog", options: ["Macska", "Kutya", "Madár"], a: 1 },
+                { q: "My name is...", options: ["A nevem...", "Én vagyok...", "Jól vagyok..."], a: 0 },
+                { q: "Cat", options: ["Kutya", "Macska", "Egér"], a: 1 },
+                { q: "One", options: ["Egy", "Kettő", "Három"], a: 0 },
+                { q: "Sister", options: ["Fiútestvér", "Lánytestvér", "Anya"], a: 1 },
+                { q: "House", options: ["Ház", "Lakás", "Kert"], a: 0 },
+                { q: "To eat", options: ["Inni", "Enni", "Aludni"], a: 1 },
+                { q: "Milk", options: ["Víz", "Tej", "Sör"], a: 1 },
+                { q: "Small", options: ["Nagy", "Kicsi", "Hosszú"], a: 1 },
+                { q: "Goodbye", options: ["Szia", "Viszlát", "Jó éjszakát"], a: 1 },
+                { q: "Book", options: ["Füzet", "Toll", "Könyv"], a: 2 },
+                { q: "Water", options: ["Víz", "Tűz", "Föld"], a: 0 },
+                { q: "She ___ a teacher.", options: ["is", "are", "am"], a: 0 },
+                { q: "They ___ football every day.", options: ["plays", "play", "playing"], a: 1 },
+                { q: "___ you like coffee?", options: ["Does", "Is", "Do"], a: 2 },
+                { q: "I ___ a student.", options: ["is", "am", "are"], a: 1 },
+                { q: "___ is your name?", options: ["Who", "What", "How"], a: 1 },
+                { q: "They ___ not at home.", options: ["is", "am", "are"], a: 2 },
+                { q: "Yellow", options: ["Sárga", "Zöld", "Fekete"], a: 0 },
+                { q: "Father", options: ["Anya", "Apa", "Testvér"], a: 1 },
+                { q: "Ten", options: ["Öt", "Tíz", "Húsz"], a: 1 },
+                { q: "Table", options: ["Szék", "Asztal", "Ágy"], a: 1 },
+                { q: "He ___ sleeping.", options: ["is", "are", "am"], a: 0 },
+                { q: "___ you swim?", options: ["Do", "Are", "Can"], a: 2 },
+                { q: "Monday", options: ["Kedd", "Hétfő", "Szerda"], a: 1 },
+                { q: "One child, two ___.", options: ["childs", "children", "child"], a: 1 },
+                { q: "Bread", options: ["Víz", "Kenyér", "Tej"], a: 1 },
+                { q: "This is ___ book.", options: ["my", "I", "me"], a: 0 },
+                { q: "I ___ a doctor.", options: ["is", "am", "are"], a: 1 },
+                { q: "She ___ not like apples.", options: ["do", "does", "is"], a: 1 },
+                { q: "___ they happy?", options: ["Is", "Am", "Are"], a: 2 },
+                { q: "We ___ to school.", options: ["go", "goes", "going"], a: 0 },
+                { q: "He ___ a big car.", options: ["have", "has", "is"], a: 1 },
+                { q: "___ is your pen?", options: ["Who", "Where", "Why"], a: 1 },
+                { q: "They ___ playing football.", options: ["is", "am", "are"], a: 2 },
+                { q: "It ___ a cat.", options: ["is", "are", "am"], a: 0 },
+                { q: "___ you speak English?", options: ["Does", "Do", "Are"], a: 1 },
+                { q: "My mother ___ cooking.", options: ["are", "is", "am"], a: 1 },
+                { q: "How are you?", options: ["Hogy vagy?", "Ki vagy?", "Hol vagy?"], a: 0 },
+                { q: "I don't understand", options: ["Nem értem", "Nem tudom", "Nem látom"], a: 0 },
+                { q: "Help", options: ["Segítség", "Baj", "Öröm"], a: 0 },
+                { q: "Bathroom", options: ["Konyha", "Fürdőszoba", "Hálószoba"], a: 1 },
+                { q: "Open", options: ["Zárva", "Nyitva", "Tilos"], a: 1 },
+                { q: "Closed", options: ["Nyitva", "Zárva", "Szabad"], a: 1 },
+                { q: "Left", options: ["Jobb", "Bal", "Egyenesen"], a: 1 },
+                { q: "Right", options: ["Bal", "Jobb", "Hátra"], a: 1 },
+                { q: "Stop", options: ["Indulj", "Állj", "Fuss"], a: 1 },
+                { q: "Go", options: ["Menj", "Maradj", "Várj"], a: 0 },
+                { q: "Big", options: ["Kicsi", "Nagy", "Szép"], a: 1 },
+                { q: "Hot", options: ["Hideg", "Meleg/Forró", "Langyos"], a: 1 },
+                { q: "Cold", options: ["Forró", "Hideg", "Száraz"], a: 1 },
+                { q: "Today", options: ["Holnap", "Tegnap", "Ma"], a: 2 },
+                { q: "Love", options: ["Szeretet/Szerelem", "Utálat", "Barátság"], a: 0 },
+                { q: "Happy Birthday", options: ["Boldog Karácsonyt", "Boldog Születésnapot", "Jó éjszakát"], a: 1 },
+                { q: "Phone", options: ["Telefon", "Tévé", "Rádió"], a: 0 },
+                { q: "Key", options: ["Ajtó", "Kulcs", "Zár"], a: 1 },
+                { q: "Bed", options: ["Szék", "Asztal", "Ágy"], a: 2 },
+                { q: "Car", options: ["Busz", "Autó", "Bicikli"], a: 1 },
+                { q: "The cat is ___ the table.", options: ["under", "between", "into"], a: 0 },
+                { q: "The car is ___ the house.", options: ["in front of", "through", "into"], a: 0 },
+                { q: "The garden is ___ the house.", options: ["behind", "into", "through"], a: 0 },
+                { q: "The book is ___ the bag.", options: ["in", "on", "at"], a: 0 },
+                { q: "The picture is ___ the wall.", options: ["on", "in", "at"], a: 0 },
+                { q: "He is standing ___ me.", options: ["next to", "under", "in"], a: 0 },
+                { q: "He is hiding ___ the tree.", options: ["behind", "on", "at"], a: 0 },
+                { q: "Put the box ___ the shelf.", options: ["on", "in", "at"], a: 0 },
+                { q: "There is a spider ___ the ceiling.", options: ["on", "in", "at"], a: 0 },
+                { q: "I ___ eat breakfast.", options: ["always", "yesterday", "tomorrow"], a: 0 },
+                { q: "She ___ goes to the gym.", options: ["never", "tomorrow", "next week"], a: 0 },
+                { q: "We ___ watch movies on Fridays.", options: ["usually", "last", "next"], a: 0 },
+                { q: "He is ___ late for work.", options: ["often", "yesterday", "tomorrow"], a: 0 },
+                { q: "They visit us ___ month.", options: ["every", "yesterday", "ago"], a: 0 },
+                { q: "He arrives ___ on time.", options: ["always", "yesterday", "tomorrow"], a: 0 },
+                { q: "Breakfast", options: ["Ebéd", "Reggeli", "Vacsora"], a: 1 },
+                { q: "Lunch", options: ["Vacsora", "Reggeli", "Ebéd"], a: 2 },
+                { q: "Dinner", options: ["Ebéd", "Vacsora", "Reggeli"], a: 1 },
+                { q: "Fork", options: ["Kés", "Kanál", "Villa"], a: 2 },
+                { q: "Spoon", options: ["Villa", "Kanál", "Kés"], a: 1 },
+                { q: "Knife", options: ["Kés", "Villa", "Kanál"], a: 0 },
+                { q: "Plate", options: ["Pohár", "Tányér", "Tál"], a: 1 },
+                { q: "Glass", options: ["Tányér", "Pohár", "Üveg"], a: 1 },
+                { q: "Cup", options: ["Csésze", "Pohár", "Tányér"], a: 0 },
+                { q: "Napkin", options: ["Terítő", "Szalvéta", "Kendő"], a: 1 },
+                { q: "T-shirt", options: ["Ing", "Póló", "Pulóver"], a: 1 },
+                { q: "Pants", options: ["Szoknya", "Nadrág", "Rövidnadrág"], a: 1 },
+                { q: "Dress", options: ["Nadrág", "Ing", "Ruha (női)"], a: 2 },
+                { q: "Skirt", options: ["Szoknya", "Ruha", "Nadrág"], a: 0 },
+                { q: "Shoes", options: ["Zokni", "Cipő", "Csizma"], a: 1 },
+                { q: "Hat", options: ["Sál", "Kalap/Sapka", "Kesztyű"], a: 1 },
+                { q: "Coat", options: ["Kabát", "Zakó", "Mellény"], a: 0 },
+                { q: "Jacket", options: ["Kabát", "Dzseki/Zakó", "Pulóver"], a: 1 },
+                { q: "Socks", options: ["Cipő", "Zokni", "Harisnya"], a: 1 },
+                { q: "Boots", options: ["Papucs", "Csizma", "Cipő"], a: 1 }
+            ],
+            'A2': [
+                { q: "Yesterday", options: ["Holnap", "Tegnap", "Ma"], a: 1 },
+                { q: "Dangerous", options: ["Biztonságos", "Veszélyes", "Unalmas"], a: 1 },
+                { q: "I have a car", options: ["Van egy autóm", "Vezetek egy autót", "Vettem egy autót"], a: 0 },
+                { q: "To decide", options: ["Dönteni", "Futni", "Vásárolni"], a: 0 },
+                { q: "Expensive", options: ["Olcsó", "Drága", "Ingyenes"], a: 1 },
+                { q: "Library", options: ["Könyvesbolt", "Könyvtár", "Iskola"], a: 1 },
+                { q: "To travel", options: ["Utazni", "Dolgozni", "Pihenni"], a: 0 },
+                { q: "Cheap", options: ["Drága", "Olcsó", "Nehéz"], a: 1 },
+                { q: "Weather", options: ["Időjárás", "Idő", "Hétvége"], a: 0 },
+                { q: "To forget", options: ["Emlékezni", "Elfelejteni", "Tanulni"], a: 1 },
+                { q: "Busy", options: ["Szabad", "Elfoglalt", "Lusta"], a: 1 },
+                { q: "Kitchen", options: ["Nappali", "Fürdőszoba", "Konyha"], a: 2 },
+                { q: "To meet", options: ["Találkozni", "Beszélni", "Írni"], a: 0 },
+                { q: "Famous", options: ["Híres", "Ismeretlen", "Gazdag"], a: 0 },
+                { q: "Bridge", options: ["Út", "Híd", "Alagút"], a: 1 },
+                { q: "Empty", options: ["Tele", "Üres", "Nehéz"], a: 1 },
+                { q: "To sell", options: ["Venni", "Eladni", "Bérelni"], a: 1 },
+                { q: "Health", options: ["Betegség", "Egészség", "Pénz"], a: 1 },
+                { q: "Usually", options: ["Néha", "Soha", "Általában"], a: 2 },
+                { q: "I ___ to the cinema yesterday.", options: ["go", "went", "gone"], a: 1 },
+                { q: "This car is ___ than that one.", options: ["fast", "fastest", "faster"], a: 2 },
+                { q: "We are ___ TV right now.", options: ["watch", "watching", "watched"], a: 1 },
+                { q: "She ___ to music now.", options: ["listens", "is listening", "listened"], a: 1 },
+                { q: "We ___ visit our grandmother tomorrow.", options: ["going to", "are going to", "will going to"], a: 1 },
+                { q: "___ you ever been to London?", options: ["Has", "Did", "Have"], a: 2 },
+                { q: "Shirt", options: ["Nadrág", "Ing", "Cipő"], a: 1 },
+                { q: "I ___ reading a book when you called.", options: ["was", "were", "am"], a: 0 },
+                { q: "Doctor", options: ["Tanár", "Orvos", "Mérnök"], a: 1 },
+                { q: "I think it ___ rain tomorrow.", options: ["will", "is", "going to"], a: 0 },
+                { q: "Airport", options: ["Kikötő", "Repülőtér", "Pályaudvar"], a: 1 },
+                { q: "This is the ___ building in the city.", options: ["big", "bigger", "biggest"], a: 2 },
+                { q: "To buy", options: ["Venni", "Eladni", "Kérni"], a: 0 },
+                { q: "He runs ___.", options: ["quick", "quickly", "fastly"], a: 1 },
+                { q: "Hand", options: ["Láb", "Kéz", "Fej"], a: 1 },
+                { q: "The book is ___ the table.", options: ["on", "in", "at"], a: 0 },
+                { q: "I ___ him yesterday.", options: ["see", "saw", "seen"], a: 1 },
+                { q: "She is ___ than me.", options: ["tall", "taller", "tallest"], a: 1 },
+                { q: "We ___ at home last night.", options: ["was", "were", "are"], a: 1 },
+                { q: "He ___ not go to the party.", options: ["did", "do", "does"], a: 0 },
+                { q: "The cat is ___ the chair.", options: ["under", "between", "into"], a: 0 },
+                { q: "___ you like some tea?", options: ["Do", "Would", "Are"], a: 1 },
+                { q: "I am interested ___ music.", options: ["on", "at", "in"], a: 2 },
+                { q: "She ___ swim very well.", options: ["can", "knows", "is"], a: 0 },
+                { q: "They ___ buying a new car.", options: ["is", "are", "was"], a: 1 },
+                { q: "This is the ___ movie ever.", options: ["good", "better", "best"], a: 2 },
+                { q: "Luggage", options: ["Poggyász", "Jegy", "Útlevél"], a: 0 },
+                { q: "Passport", options: ["Személyi", "Útlevél", "Jogosítvány"], a: 1 },
+                { q: "Entrance", options: ["Kijárat", "Bejárat", "Vészkijárat"], a: 1 },
+                { q: "Exit", options: ["Bejárat", "Kijárat", "Lépcső"], a: 1 },
+                { q: "To order", options: ["Rendelni", "Fizetni", "Kérdezni"], a: 0 },
+                { q: "Bill", options: ["Étlap", "Számla", "Pénztárca"], a: 1 },
+                { q: "Waiter", options: ["Szakács", "Pincér", "Portás"], a: 1 },
+                { q: "Menu", options: ["Számla", "Étlap", "Recept"], a: 1 },
+                { q: "Delicious", options: ["Rossz ízű", "Finom", "Sós"], a: 1 },
+                { q: "To book", options: ["Olvasni", "Lefoglalni", "Írni"], a: 1 },
+                { q: "Flight", options: ["Repülés/Járat", "Vonatút", "Séta"], a: 0 },
+                { q: "Delay", options: ["Érkezés", "Késés", "Indulás"], a: 1 },
+                { q: "To arrive", options: ["Megérkezni", "Elindulni", "Maradni"], a: 0 },
+                { q: "To leave", options: ["Érkezni", "Elindulni/Elhagyni", "Várni"], a: 1 },
+                { q: "Map", options: ["Térkép", "Kép", "Könyv"], a: 0 },
+                { q: "Street", options: ["Tér", "Utca", "Ház"], a: 1 },
+                { q: "Neighbor", options: ["Szomszéd", "Barát", "Rokon"], a: 0 },
+                { q: "Gift", options: ["Ajándék", "Pénz", "Levél"], a: 0 },
+                { q: "Party", options: ["Munka", "Buli/Parti", "Pihenés"], a: 1 },
+                { q: "Weekend", options: ["Hétköznap", "Hétvége", "Ünnepnap"], a: 1 },
+                { q: "The bank is ___ the post office and the cinema.", options: ["between", "among", "through"], a: 0 },
+                { q: "The plane is flying ___ the clouds.", options: ["above", "on", "in"], a: 0 },
+                { q: "We walked ___ the forest.", options: ["through", "on", "at"], a: 0 },
+                { q: "The bridge is ___ the river.", options: ["over", "under", "in"], a: 0 },
+                { q: "Come and sit ___ me.", options: ["beside", "between", "among"], a: 0 },
+                { q: "He walked ___ the room.", options: ["into", "in", "on"], a: 0 },
+                { q: "She took the phone ___ her pocket.", options: ["out of", "into", "through"], a: 0 },
+                { q: "The bus stop is ___ the street.", options: ["across", "through", "between"], a: 0 },
+                { q: "They live ___ the corner.", options: ["around", "through", "between"], a: 0 },
+                { q: "The dog ran ___ the cat.", options: ["after", "before", "between"], a: 0 },
+                { q: "Do you ___ play football?", options: ["ever", "never", "always"], a: 0 },
+                { q: "I have ___ been to London.", options: ["never", "ever", "yesterday"], a: 0 },
+                { q: "She has ___ finished her homework.", options: ["just", "yet", "ever"], a: 0 },
+                { q: "Have you ___ seen this movie?", options: ["already", "yet", "ever"], a: 0 },
+                { q: "I haven't seen him ___.", options: ["yet", "just", "already"], a: 0 },
+                { q: "We go on holiday ___ a year.", options: ["once", "one", "first"], a: 0 },
+                { q: "I will love you ___.", options: ["forever", "yesterday", "ago"], a: 0 },
+                { q: "Meal", options: ["Ital", "Étkezés", "Desszert"], a: 1 },
+                { q: "Snack", options: ["Főétel", "Rágcsálnivaló", "Leves"], a: 1 },
+                { q: "Dessert", options: ["Előétel", "Desszert", "Saláta"], a: 1 },
+                { q: "Soup", options: ["Leves", "Főzelék", "Szósz"], a: 0 },
+                { q: "Salad", options: ["Hús", "Saláta", "Köret"], a: 1 },
+                { q: "Meat", options: ["Zöldség", "Hús", "Gyümölcs"], a: 1 },
+                { q: "Vegetable", options: ["Gyümölcs", "Zöldség", "Gabona"], a: 1 },
+                { q: "Fruit", options: ["Zöldség", "Hús", "Gyümölcs"], a: 2 },
+                { q: "Salt", options: ["Bors", "Cukor", "Só"], a: 2 },
+                { q: "Pepper", options: ["Só", "Bors", "Paprika"], a: 1 },
+                { q: "Sweater", options: ["Póló", "Pulóver", "Ing"], a: 1 },
+                { q: "Jeans", options: ["Vászon nadrág", "Farmer", "Melegítő"], a: 1 },
+                { q: "Shorts", options: ["Hosszúnadrág", "Rövidnadrág", "Alsónadrág"], a: 1 },
+                { q: "Scarf", options: ["Sapka", "Sál", "Kesztyű"], a: 1 },
+                { q: "Gloves", options: ["Zokni", "Kesztyű", "Sál"], a: 1 },
+                { q: "Belt", options: ["Nyakkendő", "Öv", "Gomb"], a: 1 },
+                { q: "Tie", options: ["Öv", "Nyakkendő", "Csokornyakkendő"], a: 1 },
+                { q: "Suit", options: ["Öltöny", "Kosztüm", "Egyenruha"], a: 0 },
+                { q: "Uniform", options: ["Öltöny", "Egyenruha", "Pizsama"], a: 1 },
+                { q: "Pocket", options: ["Gomb", "Zseb", "Gallér"], a: 1 }
+            ],
+            'B1': [
+                { q: "Environment", options: ["Környezet", "Kormány", "Gazdaság"], a: 0 },
+                { q: "To afford", options: ["Megengedheti magának (anyagilag)", "Elfelejt", "Megbocsát"], a: 0 },
+                { q: "I used to play tennis", options: ["Szoktam teniszezni", "Régen teniszeztem (ma már nem)", "Teniszezni fogok"], a: 1 },
+                { q: "Achievement", options: ["Teljesítmény", "Kudarc", "Kísérlet"], a: 0 },
+                { q: "To complain", options: ["Dicsérni", "Panaszkodni", "Magyarázni"], a: 1 },
+                { q: "Unless", options: ["Hacsak nem", "Mivel", "Bár"], a: 0 },
+                { q: "Opportunity", options: ["Lehetőség", "Probléma", "Megoldás"], a: 0 },
+                { q: "To avoid", options: ["Elkerülni", "Keresni", "Találni"], a: 0 },
+                { q: "Despite", options: ["Annak ellenére", "Mivel", "Ezért"], a: 0 },
+                { q: "To convince", options: ["Meggyőzni", "Hazudni", "Kérdezni"], a: 0 },
+                { q: "Curious", options: ["Féltékeny", "Kíváncsi", "Mérges"], a: 1 },
+                { q: "To improve", options: ["Rontani", "Javítani / Fejleszteni", "Megtartani"], a: 1 },
+                { q: "Salary", options: ["Adó", "Fizetés", "Kölcsön"], a: 1 },
+                { q: "Accommodation", options: ["Utazás", "Szállás", "Étkezés"], a: 1 },
+                { q: "To regret", options: ["Megbánni", "Elfelejteni", "Tervezni"], a: 0 },
+                { q: "Responsible", options: ["Felelőtlen", "Felelős", "Fáradt"], a: 1 },
+                { q: "To participate", options: ["Nézni", "Részt venni", "Szervezni"], a: 1 },
+                { q: "Habit", options: ["Szokás", "Hobbi", "Munka"], a: 0 },
+                { q: "To encourage", options: ["Bátorítani", "Ijeszteni", "Tiltani"], a: 0 },
+                { q: "I ___ here for ten years.", options: ["have lived", "live", "lived"], a: 0 },
+                { q: "If it rains, we ___ stay at home.", options: ["would", "will", "did"], a: 1 },
+                { q: "You ___ smoke here. It's forbidden.", options: ["mustn't", "don't have to", "shouldn't"], a: 0 },
+                { q: "I look forward to ___ you.", options: ["see", "seeing", "saw"], a: 1 },
+                { q: "This is the man ___ car was stolen.", options: ["who", "which", "whose"], a: 2 },
+                { q: "Freedom", options: ["Szabadság", "Béke", "Háború"], a: 0 },
+                { q: "This cake ___ by my mother.", options: ["made", "was made", "is make"], a: 1 },
+                { q: "To suggest", options: ["Javasolni", "Parancsolni", "Kérdezni"], a: 0 },
+                { q: "I ___ smoke, but I stopped.", options: ["use to", "used to", "usually"], a: 1 },
+                { q: "Disappointed", options: ["Boldog", "Csalódott", "Izgatott"], a: 1 },
+                { q: "If I ___ rich, I would buy a boat.", options: ["am", "were", "would be"], a: 1 },
+                { q: "However", options: ["Azonban", "Mert", "Tehát"], a: 0 },
+                { q: "When I arrived, the train ___ already left.", options: ["has", "had", "was"], a: 1 },
+                { q: "To give up", options: ["Feladni / Abbahagyni", "Elkezdeni", "Folytatni"], a: 0 },
+                { q: "He said that he ___ tired.", options: ["is", "was", "has been"], a: 1 },
+                { q: "I ___ never been to Paris.", options: ["has", "have", "did"], a: 1 },
+                { q: "If I see him, I ___ tell him.", options: ["would", "will", "had"], a: 1 },
+                { q: "You ___ to study harder.", options: ["must", "should", "ought"], a: 2 },
+                { q: "She asked me if I ___ help her.", options: ["can", "could", "will"], a: 1 },
+                { q: "The car ___ repaired right now.", options: ["is being", "is", "has been"], a: 0 },
+                { q: "I enjoy ___ movies.", options: ["watch", "to watch", "watching"], a: 2 },
+                { q: "He stopped ___ cigarettes.", options: ["smoking", "to smoke", "smoke"], a: 0 },
+                { q: "I have known him ___ 2010.", options: ["since", "for", "ago"], a: 0 },
+                { q: "This is the book ___ I bought.", options: ["who", "what", "which"], a: 2 },
+                { q: "I am used to ___ early.", options: ["get up", "getting up", "got up"], a: 1 },
+                { q: "To apologize", options: ["Bocsánatot kérni", "Köszönni", "Vitatkozni"], a: 0 },
+                { q: "To appreciate", options: ["Értékelni/Méltányolni", "Utálni", "Figyelmen kívül hagyni"], a: 0 },
+                { q: "Convenient", options: ["Kényelmes/Megfelelő", "Drága", "Bonyolult"], a: 0 },
+                { q: "To recommend", options: ["Ajánlani", "Tiltani", "Kérni"], a: 0 },
+                { q: "Available", options: ["Elérhető", "Foglalt", "Hiánycikk"], a: 0 },
+                { q: "To confirm", options: ["Megerősíteni", "Lemondani", "Kérdezni"], a: 0 },
+                { q: "Delivery", options: ["Rendelés", "Szállítás/Kézbesítés", "Fizetés"], a: 1 },
+                { q: "Discount", options: ["Áremelés", "Kedvezmény", "Adó"], a: 1 },
+                { q: "Refund", options: ["Visszatérítés", "Fizetés", "Kölcsön"], a: 0 },
+                { q: "Receipt", options: ["Recept", "Nyugta/Blokk", "Levél"], a: 1 },
+                { q: "Insurance", options: ["Biztosítás", "Bank", "Kórház"], a: 0 },
+                { q: "Appointment", options: ["Csalódás", "Időpont/Találkozó", "Feladat"], a: 1 },
+                { q: "To cancel", options: ["Megerősíteni", "Lemondani/Törölni", "Módosítani"], a: 1 },
+                { q: "Solution", options: ["Probléma", "Megoldás", "Kérdés"], a: 1 },
+                { q: "To explain", options: ["Magyarázni", "Hallgatni", "Érteni"], a: 0 },
+                { q: "Reason", options: ["Ok", "Eredmény", "Cél"], a: 0 },
+                { q: "Opinion", options: ["Tény", "Vélemény", "Hazugság"], a: 1 },
+                { q: "To agree", options: ["Egyetérteni", "Vitatkozni", "Tagadni"], a: 0 },
+                { q: "To disagree", options: ["Egyetérteni", "Nem érteni egyet", "Bólogatni"], a: 1 },
+                { q: "Experience", options: ["Tapasztalat/Élmény", "Kísérlet", "Elmélet"], a: 0 },
+                { q: "He is standing ___ the crowd.", options: ["among", "between", "through"], a: 0 },
+                { q: "I ___ see him these days.", options: ["rarely", "always", "forever"], a: 0 },
+                { q: "He ___ calls me.", options: ["seldom", "always", "forever"], a: 0 },
+                { q: "She is ___ complaining.", options: ["always", "never", "seldom"], a: 0 },
+                { q: "We ___ go out during the week.", options: ["hardly ever", "always", "forever"], a: 0 },
+                { q: "I see him ___ now and then.", options: ["every", "some", "any"], a: 0 },
+                { q: "It rains ___ in the desert.", options: ["seldom", "always", "often"], a: 0 },
+                { q: "Ingredient", options: ["Recept", "Hozzávaló", "Eszköz"], a: 1 },
+                { q: "Recipe", options: ["Számla", "Recept", "Menü"], a: 1 },
+                { q: "To boil", options: ["Sütni", "Főzni/Forralni", "Párolni"], a: 1 },
+                { q: "To fry", options: ["Sütni (olajban)", "Főzni", "Grillezni"], a: 0 },
+                { q: "To bake", options: ["Főzni", "Sütni (sütőben)", "Olvasztani"], a: 1 },
+                { q: "Spicy", options: ["Édes", "Csípős/Fűszeres", "Sós"], a: 1 },
+                { q: "Sweet", options: ["Savanyú", "Édes", "Keserű"], a: 1 },
+                { q: "Sour", options: ["Édes", "Savanyú", "Sós"], a: 1 },
+                { q: "Bitter", options: ["Keserű", "Édes", "Savanyú"], a: 0 },
+                { q: "Taste", options: ["Szag", "Íz", "Látvány"], a: 1 },
+                { q: "Button", options: ["Cipzár", "Gomb", "Kapocs"], a: 1 },
+                { q: "Zipper", options: ["Gomb", "Cipzár", "Tépőzár"], a: 1 },
+                { q: "Cotton", options: ["Selyem", "Pamut", "Gyapjú"], a: 1 },
+                { q: "Wool", options: ["Pamut", "Gyapjú", "Bőr"], a: 1 },
+                { q: "Leather", options: ["Bőr", "Szőrme", "Műanyag"], a: 0 },
+                { q: "Size", options: ["Szín", "Méret", "Anyag"], a: 1 },
+                { q: "To try on", options: ["Megvenni", "Felpróbálni", "Kicserélni"], a: 1 },
+                { q: "To wear", options: ["Viselni", "Mosni", "Vasalni"], a: 0 },
+                { q: "Fashion", options: ["Stílus", "Divat", "Márka"], a: 1 },
+                { q: "Stylish", options: ["Divatos/Stílusos", "Ódivatú", "Egyszerű"], a: 0 }
+            ],
+            'B2': [
+                { q: "Inevitably", options: ["Véletlenül", "Elkerülhetetlenül", "Szándékosan"], a: 1 },
+                { q: "Subtle", options: ["Nyilvánvaló", "Finom / Árnyalt", "Erőszakos"], a: 1 },
+                { q: "If I had known, I would have gone.", options: ["Ha tudtam volna, elmentem volna.", "Ha tudom, elmegyek.", "Bárcsak elmentem volna."], a: 0 },
+                { q: "To grasp", options: ["Megragadni / Megérteni", "Eldobni", "Felejteni"], a: 0 },
+                { q: "Reluctant", options: ["Lelkes", "Vonakodó", "Bátor"], a: 1 },
+                { q: "Ambiguous", options: ["Egyértelmű", "Kétértelmű / Zavaros", "Unalmas"], a: 1 },
+                { q: "To advocate", options: ["Ellenezni", "Támogatni / Szorgalmazni", "Figyelmen kívül hagyni"], a: 1 },
+                { q: "Prejudice", options: ["Előítélet", "Igazság", "Türelem"], a: 0 },
+                { q: "Simultaneously", options: ["Egymás után", "Egyidejűleg", "Később"], a: 1 },
+                { q: "To distinguish", options: ["Összekeverni", "Megkülönböztetni", "Egyesíteni"], a: 1 },
+                { q: "Conscious", options: ["Tudatos", "Öntudatlan", "Álmos"], a: 0 },
+                { q: "To implement", options: ["Tervezni", "Megvalósítani / Bevezetni", "Törölni"], a: 1 },
+                { q: "Negligence", options: ["Figyelem", "Hanyagság", "Szorgalom"], a: 1 },
+                { q: "To perceive", options: ["Érzékelni / Észlelni", "Tagadni", "Rejteni"], a: 0 },
+                { q: "Appropriate", options: ["Helytelen", "Megfelelő", "Furc"], a: 1 },
+                { q: "To exaggerate", options: ["Túlozni", "Csökkenteni", "Pontosítani"], a: 0 },
+                { q: "Vulnerable", options: ["Erős", "Sebezhető", "Biztonságos"], a: 1 },
+                { q: "To acquire", options: ["Elveszíteni", "Elsajátítani / Megszerezni", "Kölcsönadni"], a: 1 },
+                { q: "Controversial", options: ["Vitatott", "Elfogadott", "Egyszerű"], a: 0 },
+                { q: "The letter ___ yesterday.", options: ["sent", "was sent", "is sent"], a: 1 },
+                { q: "If I ___ you, I would accept the offer.", options: ["was", "am", "were"], a: 2 },
+                { q: "He asked me where ___.", options: ["did I live", "do I live", "I lived"], a: 2 },
+                { q: "I wish I ___ harder for the exam.", options: ["studied", "would study", "had studied"], a: 2 },
+                { q: "Hardly ___ I arrived when the phone rang.", options: ["had", "did", "was"], a: 0 },
+                { q: "Plausible", options: ["Hihető", "Lehetetlen", "Nevetséges"], a: 0 },
+                { q: "If I ___ you, I would have said hello.", options: ["saw", "had seen", "see"], a: 1 },
+                { q: "To deteriorate", options: ["Javulni", "Romlani", "Változni"], a: 1 },
+                { q: "Piece of cake", options: ["Nagyon könnyű", "Egy szelet süti", "Nehéz feladat"], a: 0 },
+                { q: "By next year, I ___ finished my studies.", options: ["will have", "will be", "have"], a: 0 },
+                { q: "Coincidence", options: ["Véletlen egybeesés", "Terv", "Baleset"], a: 0 },
+                { q: "It was John ___ broke the window.", options: ["who", "which", "what"], a: 0 },
+                { q: "Presumably", options: ["Biztosan", "Feltehetőleg", "Soha"], a: 1 },
+                { q: "___ down the street, I saw an accident.", options: ["Walked", "Walking", "To walk"], a: 1 },
+                { q: "To scrutinize", options: ["Alaposan megvizsgálni", "Figyelmen kívül hagyni", "Dicsérni"], a: 0 },
+                { q: "No sooner ___ I arrived than he left.", options: ["had", "did", "was"], a: 0 },
+                { q: "I'd rather you ___ not smoke here.", options: ["do", "did", "would"], a: 1 },
+                { q: "It's high time we ___ home.", options: ["go", "went", "gone"], a: 1 },
+                { q: "___ the rain, we went out.", options: ["Although", "Despite", "However"], a: 1 },
+                { q: "He is believed ___ rich.", options: ["to be", "being", "is"], a: 0 },
+                { q: "You ___ have seen him; he is in France.", options: ["mustn't", "can't", "shouldn't"], a: 1 },
+                { q: "I suggest that he ___ a doctor.", options: ["sees", "see", "saw"], a: 1 },
+                { q: "Had I known, I ___ have helped.", options: ["would", "will", "can"], a: 0 },
+                { q: "Not only ___ he late, but he also forgot his book.", options: ["was", "is", "were"], a: 0 },
+                { q: "She accused him ___ stealing the money.", options: ["for", "of", "on"], a: 1 },
+                { q: "To negotiate", options: ["Tárgyalni/Alkudni", "Veszekedni", "Parancsolni"], a: 0 },
+                { q: "Compromise", options: ["Győzelem", "Kompromisszum", "Vereség"], a: 1 },
+                { q: "To persuade", options: ["Meggyőzni/Rábeszélni", "Kényszeríteni", "Leállítani"], a: 0 },
+                { q: "Deadline", options: ["Kezdés", "Határidő", "Szünet"], a: 1 },
+                { q: "Proposal", options: ["Javaslat/Indítvány", "Utasítás", "Panasz"], a: 0 },
+                { q: "To collaborate", options: ["Együttműködni", "Versenyezni", "Vitázni"], a: 0 },
+                { q: "Efficient", options: ["Hatékony", "Lassú", "Drága"], a: 0 },
+                { q: "To prioritize", options: ["Halogatni", "Priorizálni/Előtérbe helyezni", "Elfelejteni"], a: 1 },
+                { q: "Feedback", options: ["Visszajelzés", "Étel", "Háttér"], a: 0 },
+                { q: "Objective", options: ["Szubjektív", "Objektív/Célkitűzés", "Érzelmes"], a: 1 },
+                { q: "Strategy", options: ["Szerencse", "Stratégia", "Véletlen"], a: 1 },
+                { q: "To analyze", options: ["Elemezni", "Bonyolítani", "Másolni"], a: 0 },
+                { q: "Significant", options: ["Jelentéktelen", "Jelentős", "Apró"], a: 1 },
+                { q: "To resolve", options: ["Megoldani", "Okozni", "Kerülni"], a: 0 },
+                { q: "Conflict", options: ["Béke", "Konfliktus", "Egyetértés"], a: 1 },
+                { q: "To clarify", options: ["Összezavarni", "Tisztázni", "Elrejteni"], a: 1 },
+                { q: "Misunderstanding", options: ["Félreértés", "Megértés", "Tudás"], a: 0 },
+                { q: "To emphasize", options: ["Hangsúlyozni", "Suttogni", "Tagadni"], a: 0 },
+                { q: "Perspective", options: ["Távolság", "Perspektíva/Nézőpont", "Idő"], a: 1 },
+                { q: "To evaluate", options: ["Értékelni/Kiértékelni", "Becsülni", "Találgatni"], a: 0 },
+                { q: "___ have I seen such a thing.", options: ["Never", "Always", "Ever"], a: 0 }
+            ]
+        };
+
+        const readingDatabase = {
+            'A1': [
+                "My name is Peter. I am from Hungary. I live in a small house with my family. I have a dog and a cat. Every day, I go to school. I like learning English. In the afternoon, I play football with my friends. My favorite food is pizza. I usually go to bed at nine o'clock.",
+                "This is my room. It is small but nice. There is a bed, a desk, and a chair. I have many books on the shelf. I like reading in the evening. My computer is on the desk. I use it to do my homework. The walls are blue. I love my room because it is quiet.",
+                "I go shopping on Saturdays. I go to the supermarket with my mother. We buy bread, milk, and fruit. I like apples and bananas. Sometimes we buy chocolate too. The supermarket is big. There are many people there. After shopping, we go home and cook lunch.",
+                "I love playing games with my friends. We usually play football in the park on Sundays. When it rains, we stay inside and play video games. My favorite game is about building cities. It is very fun and exciting. Sometimes we play board games too. I like winning, but having fun is more important."
+            ],
+            'A2': [
+                "Last summer, I went to Lake Balaton with my friends. We travelled by train. The weather was very hot and sunny. We swam in the lake every day and ate lángos. In the evenings, we walked on the beach and talked. It was a fantastic holiday. I want to go back next year.",
+                "I work in an office in the city center. I usually wake up at six o'clock. I take the bus to work. It takes about thirty minutes. My job is interesting but sometimes stressful. I have to answer many emails and talk to clients. At lunch, I usually eat a sandwich in the park.",
+                "My favorite hobby is cooking. I learned to cook from my grandmother. She makes the best soup in the world. I like trying new recipes from different countries. Last week, I made Italian pasta. My family loved it. Cooking relaxes me after a long day at work.",
+                "Last weekend, I went to the new shopping center in the city. I needed a new pair of shoes for work. There were many sales, so the shops were full of people. I found comfortable black shoes at a good price. I also bought a birthday present for my mother. Shopping can be tiring, but I enjoy finding good deals."
+            ],
+            'B1': [
+                "Dear Sir or Madam, I am writing to complain about the service at your restaurant. I visited your establishment last Friday with my family. We had to wait forty minutes for a table, even though we had a reservation. Furthermore, the food was cold when it arrived. I hope you will improve your service in the future. Sincerely, Anna Kovács.",
+                "Living in a big city has both advantages and disadvantages. On the one hand, there are many job opportunities and entertainment options. You can go to theaters, museums, and cinemas easily. On the other hand, the traffic is often terrible, and the air is polluted. It is also more expensive to live in a city than in the countryside.",
+                "I have been learning English for five years. I think it is very important to speak foreign languages. It helps you when you travel abroad and when you are looking for a job. I try to watch movies in English to improve my listening skills. I also read articles on the internet. My goal is to pass the language exam next year.",
+                "Learning a new skill requires patience and dedication. Whether it is playing an instrument or speaking a foreign language, practice is essential. I recently started learning how to code. At first, it was very difficult, and I made many mistakes. However, I didn't give up. Now I can create simple programs, and I feel very proud of my progress. Lifelong learning keeps the mind active.",
+                "Maintaining a healthy diet is important for both physical and mental health. I try to cook my own meals using fresh ingredients like vegetables, lean meat, and whole grains. Although I love sweets, I try to limit my sugar intake. On weekends, I enjoy experimenting with new recipes from different cultures. Eating together with family is a great way to relax and talk about our day."
+            ],
+            'B2': [
+                "The impact of social media on teenagers is a widely debated topic. While these platforms offer a way to stay connected, they can also lead to anxiety and depression. The pressure to present a perfect life online often makes young people feel inadequate. Moreover, cyberbullying is a serious issue that affects many students. Parents and educators need to work together to teach responsible internet usage.",
+                "Climate change is arguably the most pressing challenge of our time. Rising global temperatures are causing more frequent and severe weather events, such as hurricanes and droughts. To mitigate these effects, we must transition to renewable energy sources and reduce our carbon footprint. Individual actions, like recycling and using public transport, are important, but systemic change is essential for a sustainable future.",
+                "Remote work has become increasingly popular in recent years. For many employees, the flexibility to work from home is a major benefit. It saves time on commuting and allows for a better work-life balance. However, some argue that it reduces collaboration and makes it harder to separate professional and personal life. Companies are now exploring hybrid models to combine the best of both worlds.",
+                "The fashion industry has a significant impact on the environment, a fact that many consumers are beginning to realize. Fast fashion encourages people to buy cheap clothes and discard them quickly, leading to massive waste. To combat this, I have started building a capsule wardrobe with high-quality, timeless pieces. I also enjoy thrift shopping, which is both sustainable and allows for a unique personal style. Dressing ethically is becoming just as important as dressing elegantly."
+            ]
+        };
+
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let timerInterval;
+        let timeLimit = 30; // másodperc
+        let currentLevel = "";
+        let wrongAnswers = [];
+        let isRetry = false;
+        
+        let readingTimerInterval;
+        let currentReadingLevel = "";
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startLevel(level) {
+            const isHardMode = document.getElementById('hard-mode').checked;
+            timeLimit = isHardMode ? 10 : 30;
+            currentLevel = level;
+
+            currentQuestions = [...database[level]];
+            shuffleArray(currentQuestions);
+            currentIndex = 0;
+            score = 0;
+            wrongAnswers = [];
+            isRetry = false;
+            document.getElementById('menu').classList.add('hidden');
+            document.getElementById('quiz').classList.remove('hidden');
+            document.getElementById('level-title').innerText = level + " Szint";
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            startTimer();
+            const data = currentQuestions[currentIndex];
+            document.getElementById('q-num').innerText = currentIndex + 1 + " / " + currentQuestions.length;
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('question-text').innerText = data.q;
+            document.getElementById('feedback').innerText = "";
+            document.getElementById('next-btn').classList.add('hidden');
+            
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            
+            data.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-option';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(idx, data.a, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            let timeLeft = timeLimit;
+            document.getElementById('timer').innerText = timeLeft;
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleTimeout();
+                }
+            }, 1000);
+        }
+
+        function handleTimeout() {
+            const buttons = document.querySelectorAll('.btn-option');
+            buttons.forEach(b => b.disabled = true);
+            document.getElementById('feedback').innerText = "Lejárt az idő! ⏰ A helyes: " + currentQuestions[currentIndex].options[currentQuestions[currentIndex].a];
+            document.getElementById('feedback').className = "wrong";
+            document.getElementById('next-btn').classList.remove('hidden');
+            wrongAnswers.push(currentQuestions[currentIndex]);
+        }
+
+        function speakCurrentQuestion() {
+            if ('speechSynthesis' in window) {
+                const text = currentQuestions[currentIndex].q.replace(/___/g, "blank");
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                window.speechSynthesis.cancel(); 
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function checkAnswer(selected, correct, btnElement) {
+            clearInterval(timerInterval);
+            const buttons = document.querySelectorAll('.btn-option');
+            buttons.forEach(b => b.disabled = true); // Gombok letiltása
+
+            if (selected === correct) {
+                score++;
+                document.getElementById('score-display').innerText = score;
+                btnElement.style.backgroundColor = '#4CAF50';
+                btnElement.style.color = 'white';
+                document.getElementById('feedback').innerText = "Helyes válasz! 🎉";
+                document.getElementById('feedback').className = "correct";
+            } else {
+                btnElement.style.backgroundColor = '#f44336';
+                btnElement.style.color = 'white';
+                document.getElementById('feedback').innerText = "Sajnos nem. A helyes: " + currentQuestions[currentIndex].options[correct];
+                document.getElementById('feedback').className = "wrong";
+                wrongAnswers.push(currentQuestions[currentIndex]);
+            }
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            if (currentIndex < currentQuestions.length) {
+                loadQuestion();
+            } else {
+                if (!isRetry) {
+                    saveResult(currentLevel, score, currentQuestions.length);
+                }
+                const percentage = Math.round((score / currentQuestions.length) * 100);
+                let msg = `Eredmény: ${score} / ${currentQuestions.length} (${percentage}%)\n`;
+                
+                if (percentage === 100) msg += "Tökéletes! 🏆";
+                else if (percentage >= 80) msg += "Kiváló! 🌟";
+                else if (percentage >= 50) msg += "Jó munka! 👍";
+                else msg += "Gyakorolj még! 💪";
+
+                if (wrongAnswers.length > 0) {
+                    msg += "\n\nSzeretnéd újra megpróbálni azokat a kérdéseket, amiket elrontottál?";
+                    if (confirm(msg)) {
+                        isRetry = true;
+                        currentQuestions = [...wrongAnswers];
+                        wrongAnswers = [];
+                        currentIndex = 0;
+                        score = 0;
+                        document.getElementById('level-title').innerText = currentLevel + " Szint (Hibajavítás)";
+                        loadQuestion();
+                        return;
+                    }
+                } else {
+                    alert(msg);
+                }
+                showMenu();
+            }
+        }
+
+        function showMenu() {
+            clearInterval(timerInterval);
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            document.getElementById('quiz').classList.add('hidden');
+            document.getElementById('menu').classList.remove('hidden');
+            document.getElementById('reading-practice').classList.add('hidden');
+            document.getElementById('vocabulary-view').classList.add('hidden');
+            clearInterval(readingTimerInterval);
+        }
+
+        // Olvasás funkciók
+        function startReading(level) {
+            currentReadingLevel = level;
+            document.getElementById('menu').classList.add('hidden');
+            document.getElementById('reading-practice').classList.remove('hidden');
+            document.getElementById('reading-level-title').innerText = level + " Szint - Olvasás";
+            loadNewReadingText();
+        }
+
+        function loadNewReadingText() {
+            clearInterval(readingTimerInterval);
+            document.getElementById('reading-progress').style.width = '0%';
+            document.getElementById('start-reading-btn').classList.remove('hidden');
+            document.getElementById('new-text-btn').classList.add('hidden');
+            
+            const texts = readingDatabase[currentReadingLevel];
+            const randomText = texts[Math.floor(Math.random() * texts.length)];
+            document.getElementById('reading-content').innerText = randomText;
+        }
+
+        function startReadingTimer() {
+            document.getElementById('start-reading-btn').classList.add('hidden');
+            let timeLeft = 60;
+            const totalTime = 60;
+            const progressBar = document.getElementById('reading-progress');
+            
+            progressBar.style.width = '0%';
+            
+            readingTimerInterval = setInterval(() => {
+                timeLeft -= 0.1;
+                const percentage = ((totalTime - timeLeft) / totalTime) * 100;
+                progressBar.style.width = percentage + '%';
+                
+                if (timeLeft <= 0) {
+                    clearInterval(readingTimerInterval);
+                    document.getElementById('new-text-btn').classList.remove('hidden');
+                }
+            }, 100);
+        }
+
+        function speakReadingText() {
+            if ('speechSynthesis' in window) {
+                const text = document.getElementById('reading-content').innerText;
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function showVocabulary() {
+            document.getElementById('menu').classList.add('hidden');
+            document.getElementById('vocabulary-view').classList.remove('hidden');
+            
+            const container = document.getElementById('vocab-content');
+            container.innerHTML = '';
+
+            for (const level in database) {
+                const levelHeader = document.createElement('div');
+                levelHeader.className = 'vocab-level-header';
+                levelHeader.innerText = level + " Szint";
+                container.appendChild(levelHeader);
+
+                const table = document.createElement('table');
+                table.className = 'vocab-table';
+                table.innerHTML = `<thead><tr><th>Kérdés / Szó</th><th>Helyes válasz</th></tr></thead><tbody></tbody>`;
+                const tbody = table.querySelector('tbody');
+                
+                database[level].forEach(item => {
+                    const row = document.createElement('tr');
+                    const correctAnswer = item.options[item.a];
+                    row.innerHTML = `<td>${item.q}</td><td style="font-weight:bold; color:#2e7d32;">${correctAnswer}</td>`;
+                    tbody.appendChild(row);
+                });
+                container.appendChild(table);
+            }
+        }
+
+        function saveResult(level, score, total) {
+            const key = 'angol_tanulo_stats';
+            let stats = JSON.parse(localStorage.getItem(key)) || {};
+            
+            if (!stats[level]) {
+                stats[level] = { best: 0, last: 0, total: total };
+            }
+            
+            stats[level].last = score;
+            stats[level].total = total; // Frissítjük a kérdések számát, ha változna
+            if (score > stats[level].best) {
+                stats[level].best = score;
+            }
+            
+            localStorage.setItem(key, JSON.stringify(stats));
+            updateStatsUI();
+        }
+
+        function updateStatsUI() {
+            const key = 'angol_tanulo_stats';
+            const stats = JSON.parse(localStorage.getItem(key)) || {};
+            const list = document.getElementById('stats-list');
+            list.innerHTML = '';
+            
+            if (Object.keys(stats).length === 0) {
+                list.innerHTML = '<li>Még nincs mentett eredmény.</li>';
+                return;
+            }
+
+            for (const level in stats) {
+                const data = stats[level];
+                const li = document.createElement('li');
+                li.style.marginBottom = '8px';
+                li.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: bold; color: #4CAF50;">${level}</span> <span>Legjobb: <b>${data.best}/${data.total}</b> <span style="font-size:0.85em; color:#888;">(Utolsó: ${data.last})</span></span></div>`;
+                list.appendChild(li);
+            }
+        }
+
+        function clearStats() {
+            if(confirm('Biztosan törölni szeretnéd az eredményeket?')) {
+                localStorage.removeItem('angol_tanulo_stats');
+                updateStatsUI();
+            }
+        }
+
+        // Inicializálás betöltéskor
+        updateStatsUI();
+    </script>
+</body>
+</html>
