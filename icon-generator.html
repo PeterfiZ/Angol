@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <title>Ikon Generátor</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9; }
+        canvas { border: 1px solid #ccc; margin: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 100%; height: auto; }
+        button { padding: 15px 30px; font-size: 18px; cursor: pointer; background: #4CAF50; color: white; border: none; border-radius: 5px; margin: 10px; }
+        button:hover { background: #45a049; }
+    </style>
+</head>
+<body>
+    <h1>PWA Ikon Generátor</h1>
+    <p>Ez az eszköz legenerálja a szükséges ikonokat az alkalmazásodhoz.</p>
+    
+    <!-- Előnézet -->
+    <div>
+        <canvas id="previewCanvas" width="512" height="512"></canvas>
+    </div>
+
+    <p>Kattints a gombokra a letöltéshez, majd másold a fájlokat az <code>index.html</code> mellé!</p>
+    <button onclick="downloadIcon(192)">192x192 Ikon Letöltése</button>
+    <button onclick="downloadIcon(512)">512x512 Ikon Letöltése</button>
+
+    <script>
+        function drawFlag(ctx, size) {
+            // 1. Kék háttér (Union Jack alap)
+            ctx.fillStyle = "#012169";
+            ctx.fillRect(0, 0, size, size);
+
+            // 2. Fehér átlók
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = size * 0.1;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(size, size);
+            ctx.moveTo(size, 0);
+            ctx.lineTo(0, size);
+            ctx.stroke();
+
+            // 3. Piros átlók
+            ctx.strokeStyle = "#C8102E";
+            ctx.lineWidth = size * 0.04;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(size, size);
+            ctx.moveTo(size, 0);
+            ctx.lineTo(0, size);
+            ctx.stroke();
+
+            // 4. Fehér kereszt
+            ctx.fillStyle = "white";
+            const wCrossW = size * 0.2;
+            ctx.fillRect((size - wCrossW) / 2, 0, wCrossW, size);
+            ctx.fillRect(0, (size - wCrossW) / 2, size, wCrossW);
+
+            // 5. Piros kereszt
+            ctx.fillStyle = "#C8102E";
+            const rCrossW = size * 0.12;
+            ctx.fillRect((size - rCrossW) / 2, 0, rCrossW, size);
+            ctx.fillRect(0, (size - rCrossW) / 2, size, rCrossW);
+        }
+
+        // Előnézet kirajzolása
+        const previewCanvas = document.getElementById('previewCanvas');
+        const ctx = previewCanvas.getContext('2d');
+        drawFlag(ctx, 512);
+
+        // Letöltés funkció
+        function downloadIcon(size) {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = size;
+            tempCanvas.height = size;
+            const tCtx = tempCanvas.getContext('2d');
+            drawFlag(tCtx, size);
+
+            const link = document.createElement('a');
+            link.download = `icon-${size}.png`;
+            link.href = tempCanvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>

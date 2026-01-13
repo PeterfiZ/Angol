@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Angol Nyelvtanuló Alkalmazás</title>
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#4CAF50">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -95,6 +99,7 @@
 
         <div style="margin-top: 20px;">
             <button class="btn" style="background-color: #008CBA;" onclick="showVocabulary()">📚 Szókincs Tár</button>
+            <button class="btn" id="installBtn" style="display:none; background-color: #FF5722;">📲 App Telepítése</button>
         </div>
 
         <div id="stats" style="margin-top: 25px; text-align: left; border-top: 1px solid #eee; padding-top: 15px;">
@@ -249,7 +254,17 @@
                 { q: "Coat", options: ["Kabát", "Zakó", "Mellény"], a: 0 },
                 { q: "Jacket", options: ["Kabát", "Dzseki/Zakó", "Pulóver"], a: 1 },
                 { q: "Socks", options: ["Cipő", "Zokni", "Harisnya"], a: 1 },
-                { q: "Boots", options: ["Papucs", "Csizma", "Cipő"], a: 1 }
+                { q: "Boots", options: ["Papucs", "Csizma", "Cipő"], a: 1 },
+                { q: "Shop", options: ["Bolt", "Iskola", "Kórház"], a: 0 },
+                { q: "Money", options: ["Idő", "Pénz", "Kártya"], a: 1 },
+                { q: "To pay", options: ["Venni", "Eladni", "Fizetni"], a: 2 },
+                { q: "Cash", options: ["Készpénz", "Hitel", "Apró"], a: 0 },
+                { q: "Market", options: ["Bolt", "Piac", "Utca"], a: 1 },
+                { q: "Customer", options: ["Eladó", "Vásárló", "Főnök"], a: 1 },
+                { q: "How much?", options: ["Hány óra?", "Mennyibe kerül?", "Hogy vagy?"], a: 1 },
+                { q: "Bag", options: ["Cipő", "Táska/Szatyor", "Kalap"], a: 1 },
+                { q: "Sale", options: ["Akció/Kiárusítás", "Drága", "Zárva"], a: 0 },
+                { q: "Card", options: ["Kártya", "Pénz", "Papír"], a: 0 }
             ],
             'A2': [
                 { q: "Yesterday", options: ["Holnap", "Tegnap", "Ma"], a: 1 },
@@ -353,7 +368,17 @@
                 { q: "Tie", options: ["Öv", "Nyakkendő", "Csokornyakkendő"], a: 1 },
                 { q: "Suit", options: ["Öltöny", "Kosztüm", "Egyenruha"], a: 0 },
                 { q: "Uniform", options: ["Öltöny", "Egyenruha", "Pizsama"], a: 1 },
-                { q: "Pocket", options: ["Gomb", "Zseb", "Gallér"], a: 1 }
+                { q: "Pocket", options: ["Gomb", "Zseb", "Gallér"], a: 1 },
+                { q: "Shopping cart", options: ["Kosár", "Bevásárlókocsi", "Polc"], a: 1 },
+                { q: "Basket", options: ["Doboz", "Kosár", "Zacskó"], a: 1 },
+                { q: "Fitting room", options: ["Próbafülke", "Mosdó", "Kijárat"], a: 0 },
+                { q: "Cashier", options: ["Vásárló", "Pénztáros", "Biztonsági őr"], a: 1 },
+                { q: "Queue", options: ["Sor", "Tömeg", "Csoport"], a: 0 },
+                { q: "Wallet", options: ["Táska", "Zseb", "Pénztárca"], a: 2 },
+                { q: "Change", options: ["Visszajáró/Apró", "Papírpénz", "Hitel"], a: 0 },
+                { q: "Department store", options: ["Kisbolt", "Piac", "Áruház"], a: 2 },
+                { q: "Grocery store", options: ["Ruhabolt", "Élelmiszerbolt", "Cipőbolt"], a: 1 },
+                { q: "To spend", options: ["Keresni (pénzt)", "Költeni", "Spórolni"], a: 1 }
             ],
             'B1': [
                 { q: "Environment", options: ["Környezet", "Kormány", "Gazdaság"], a: 0 },
@@ -446,7 +471,17 @@
                 { q: "To try on", options: ["Megvenni", "Felpróbálni", "Kicserélni"], a: 1 },
                 { q: "To wear", options: ["Viselni", "Mosni", "Vasalni"], a: 0 },
                 { q: "Fashion", options: ["Stílus", "Divat", "Márka"], a: 1 },
-                { q: "Stylish", options: ["Divatos/Stílusos", "Ódivatú", "Egyszerű"], a: 0 }
+                { q: "Stylish", options: ["Divatos/Stílusos", "Ódivatú", "Egyszerű"], a: 0 },
+                { q: "Bargain", options: ["Drága áru", "Alkalmi vétel", "Veszteség"], a: 1 },
+                { q: "Purchase", options: ["Eladás", "Vásárlás", "Rendelés"], a: 1 },
+                { q: "Consumer", options: ["Eladó", "Gyártó", "Fogyasztó"], a: 2 },
+                { q: "Brand", options: ["Típus", "Márka", "Minőség"], a: 1 },
+                { q: "Label", options: ["Ár", "Címke", "Anyag"], a: 1 },
+                { q: "Out of stock", options: ["Készleten", "Nincs készleten", "Rendelhető"], a: 1 },
+                { q: "In stock", options: ["Készleten", "Elfogyott", "Érkezik"], a: 0 },
+                { q: "Warranty", options: ["Biztosítás", "Garancia", "Számla"], a: 1 },
+                { q: "To exchange", options: ["Visszakérni", "Kicserélni", "Javítani"], a: 1 },
+                { q: "Voucher", options: ["Kupon/Utalvány", "Számla", "Aprópénz"], a: 0 }
             ],
             'B2': [
                 { q: "Inevitably", options: ["Véletlenül", "Elkerülhetetlenül", "Szándékosan"], a: 1 },
@@ -513,7 +548,17 @@
                 { q: "To emphasize", options: ["Hangsúlyozni", "Suttogni", "Tagadni"], a: 0 },
                 { q: "Perspective", options: ["Távolság", "Perspektíva/Nézőpont", "Idő"], a: 1 },
                 { q: "To evaluate", options: ["Értékelni/Kiértékelni", "Becsülni", "Találgatni"], a: 0 },
-                { q: "___ have I seen such a thing.", options: ["Never", "Always", "Ever"], a: 0 }
+                { q: "___ have I seen such a thing.", options: ["Never", "Always", "Ever"], a: 0 },
+                { q: "Retailer", options: ["Nagykereskedő", "Kiskereskedő", "Gyártó"], a: 1 },
+                { q: "Wholesale", options: ["Kiskereskedelem", "Nagykereskedelem", "Export"], a: 1 },
+                { q: "Transaction", options: ["Tranzakció", "Szállítás", "Raktározás"], a: 0 },
+                { q: "Currency", options: ["Árfolyam", "Valuta/Pénznem", "Tőzsde"], a: 1 },
+                { q: "Debt", options: ["Hitel", "Adósság", "Kamat"], a: 1 },
+                { q: "Inflation", options: ["Defláció", "Infláció", "Stagnálás"], a: 1 },
+                { q: "To browse", options: ["Vásárolni", "Nézelődni/Böngészni", "Alkudni"], a: 1 },
+                { q: "Counterfeit", options: ["Eredeti", "Hamisítvány", "Használt"], a: 1 },
+                { q: "Commodity", options: ["Szolgáltatás", "Árucikk/Alapanyag", "Luxuscikk"], a: 1 },
+                { q: "Acquisition", options: ["Eladás", "Beszerzés/Felvásárlás", "Marketing"], a: 1 }
             ]
         };
 
@@ -828,6 +873,35 @@
 
         // Inicializálás betöltéskor
         updateStatsUI();
+
+        // PWA Service Worker és Telepítés logika
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then((reg) => console.log('Service Worker regisztrálva:', reg.scope))
+                    .catch((err) => console.log('Service Worker hiba:', err));
+            });
+        }
+
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'inline-block';
+
+            installBtn.addEventListener('click', () => {
+                installBtn.style.display = 'none';
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('Felhasználó elfogadta a telepítést');
+                    }
+                    deferredPrompt = null;
+                });
+            });
+        });
     </script>
 </body>
 </html>
