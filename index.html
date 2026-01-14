@@ -14,9 +14,11 @@
             background-color: #f4f4f9;
             display: flex;
             justify-content: center;
-            align-items: center;
-            height: 100vh;
+            /* align-items: center; - Eltávolítva, hogy ne vágja le a tetejét */
+            min-height: 100vh;
             margin: 0;
+            padding: 20px 0; /* Hely hagyása a széleken */
+            box-sizing: border-box;
         }
         .container {
             background: white;
@@ -26,6 +28,7 @@
             max-width: 500px;
             width: 90%;
             text-align: center;
+            margin: auto; /* Biztonságos középre igazítás */
         }
         h1, h2 { color: #333; }
         .btn {
@@ -128,6 +131,8 @@
         <button class="btn" onclick="startLevel('A2')">A2 - Alapfok</button>
         <button class="btn" onclick="startLevel('B1')">B1 - Középfok (Eleje)</button>
     <button class="btn" onclick="startLevel('B2')">B2 - Középfok (Vége)</button>
+    <button class="btn" onclick="startLevel('C1')">C1 - Felsőfok (Eleje)</button>
+    <button class="btn" onclick="startLevel('C2')">C2 - Felsőfok (Vége)</button>
 
         <h3 style="margin-top: 25px; color: #444;">📖 1 Perces Olvasási Gyakorlat</h3>
         <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
@@ -135,6 +140,8 @@
             <button class="btn" style="width: auto; min-width: 60px;" onclick="startReading('A2')">A2</button>
             <button class="btn" style="width: auto; min-width: 60px;" onclick="startReading('B1')">B1</button>
             <button class="btn" style="width: auto; min-width: 60px;" onclick="startReading('B2')">B2</button>
+            <button class="btn" style="width: auto; min-width: 60px;" onclick="startReading('C1')">C1</button>
+            <button class="btn" style="width: auto; min-width: 60px;" onclick="startReading('C2')">C2</button>
         </div>
 
         <h3 style="margin-top: 25px; color: #444;">🧩 Mondatépítő</h3>
@@ -143,6 +150,8 @@
             <button class="btn" style="width: auto; min-width: 60px;" onclick="startSentenceBuilder('A2')">A2</button>
             <button class="btn" style="width: auto; min-width: 60px;" onclick="startSentenceBuilder('B1')">B1</button>
             <button class="btn" style="width: auto; min-width: 60px;" onclick="startSentenceBuilder('B2')">B2</button>
+            <button class="btn" style="width: auto; min-width: 60px;" onclick="startSentenceBuilder('C1')">C1</button>
+            <button class="btn" style="width: auto; min-width: 60px;" onclick="startSentenceBuilder('C2')">C2</button>
         </div>
 
         <div style="margin-top: 20px;">
@@ -632,6 +641,40 @@
                 { q: "Counterfeit", options: ["Eredeti", "Hamisítvány", "Használt"], a: 1 },
                 { q: "Commodity", options: ["Szolgáltatás", "Árucikk/Alapanyag", "Luxuscikk"], a: 1 },
                 { q: "Acquisition", options: ["Eladás", "Beszerzés/Felvásárlás", "Marketing"], a: 1 }
+            ],
+            'C1': [
+                { q: "Ubiquitous", options: ["Ritka", "Mindenütt jelenlévő", "Rejtett"], a: 1 },
+                { q: "To alleviate", options: ["Súlyosbítani", "Enyhíteni", "Okozni"], a: 1 },
+                { q: "Scrutiny", options: ["Dicséret", "Alapos vizsgálat", "Figyelmetlenség"], a: 1 },
+                { q: "To concede", options: ["Vitatni", "Elismerni / Engedni", "Nyerni"], a: 1 },
+                { q: "Ambivalent", options: ["Biztos", "Kétes érzelmű / Ambivalens", "Közömbös"], a: 1 },
+                { q: "To imply", options: ["Kijelenteni", "Utalni valamire", "Tagadni"], a: 1 },
+                { q: "I'd sooner you ___ do that.", options: ["don't", "didn't", "won't"], a: 1 },
+                { q: "Seldom ___ such a mess.", options: ["I have seen", "have I seen", "saw I"], a: 1 },
+                { q: "It's time we ___ going.", options: ["are", "were", "will be"], a: 1 },
+                { q: "Had I known, I ___ come.", options: ["would have", "will have", "would"], a: 0 },
+                { q: "To deter", options: ["Bátorítani", "Elrettenteni", "Segíteni"], a: 1 },
+                { q: "Redundant", options: ["Szükséges", "Felesleges / Létszámfeletti", "Hiányos"], a: 1 },
+                { q: "To infer", options: ["Következtetni", "Látni", "Mondani"], a: 0 },
+                { q: "Not only ___ the car, but he also burned the house.", options: ["did he crash", "he crashed", "crashed he"], a: 0 },
+                { q: "By the time we arrive, the film ___.", options: ["will start", "will have started", "starts"], a: 1 }
+            ],
+            'C2': [
+                { q: "Ephemeral", options: ["Örök", "Múlandó / Rövid életű", "Fontos"], a: 1 },
+                { q: "To obfuscate", options: ["Tisztázni", "Összezavarni / Ködösíteni", "Megvilágítani"], a: 1 },
+                { q: "Cacophony", options: ["Harmónia", "Hangzavar / Kakofónia", "Csend"], a: 1 },
+                { q: "Esoteric", options: ["Közismert", "Kevesek által értett / Ezoterikus", "Egyszerű"], a: 1 },
+                { q: "To mitigate", options: ["Növelni", "Mérsékelni", "Kezdeményezni"], a: 1 },
+                { q: "Alacrity", options: ["Lustaság", "Fürgeség / Készségesség", "Félelem"], a: 1 },
+                { q: "Were it not for his help, we ___ failed.", options: ["would have", "will have", "had"], a: 0 },
+                { q: "Little ___ she know about the surprise.", options: ["did", "does", "has"], a: 0 },
+                { q: "Whatever ___ happen, I will stay.", options: ["may", "will", "can"], a: 0 },
+                { q: "Such was the force of the storm that trees ___ uprooted.", options: ["were", "are", "have been"], a: 0 },
+                { q: "To acquiesce", options: ["Tiltakozni", "Beletörődni / Beleegyezni", "Kiabálni"], a: 1 },
+                { q: "Ubiquity", options: ["Ritkaság", "Elterjedtség", "Egyediség"], a: 1 },
+                { q: "To disparage", options: ["Dicsérni", "Lecsmérelni", "Bátorítani"], a: 1 },
+                { q: "Should you require assistance, do not hesitate ___.", options: ["to ask", "asking", "ask"], a: 0 },
+                { q: "No sooner had I sat down ___ the phone rang.", options: ["when", "than", "that"], a: 1 }
             ]
         };
 
@@ -660,6 +703,14 @@
                 { text: "Climate change is arguably the most pressing challenge of our time. Rising global temperatures are causing more frequent and severe weather events, such as hurricanes and droughts. To mitigate these effects, we must transition to renewable energy sources and reduce our carbon footprint. Individual actions, like recycling and using public transport, are important, but systemic change is essential for a sustainable future.", translation: "Az éghajlatváltozás vitathatatlanul korunk legsürgetőbb kihívása. A globális hőmérséklet emelkedése gyakoribb és súlyosabb időjárási eseményeket okoz, például hurrikánokat és aszályokat. E hatások mérséklése érdekében át kell térnünk a megújuló energiaforrásokra, és csökkentenünk kell a szénlábnyomunkat. Az egyéni cselekvések, mint az újrahasznosítás és a tömegközlekedés használata fontosak, de a rendszerszintű változás elengedhetetlen a fenntartható jövőhöz." },
                 { text: "Remote work has become increasingly popular in recent years. For many employees, the flexibility to work from home is a major benefit. It saves time on commuting and allows for a better work-life balance. However, some argue that it reduces collaboration and makes it harder to separate professional and personal life. Companies are now exploring hybrid models to combine the best of both worlds.", translation: "A távmunka egyre népszerűbbé vált az elmúlt években. Sok munkavállaló számára az otthoni munkavégzés rugalmassága jelentős előny. Időt takarít meg az ingázáson, és jobb munka-magánélet egyensúlyt tesz lehetővé. Egyesek azonban úgy vélik, hogy csökkenti az együttműködést, és megnehezíti a szakmai és a magánélet szétválasztását. A vállalatok most hibrid modelleket vizsgálnak, hogy ötvözzék a két világ legjobbjait." },
                 { text: "The fashion industry has a significant impact on the environment, a fact that many consumers are beginning to realize. Fast fashion encourages people to buy cheap clothes and discard them quickly, leading to massive waste. To combat this, I have started building a capsule wardrobe with high-quality, timeless pieces. I also enjoy thrift shopping, which is both sustainable and allows for a unique personal style. Dressing ethically is becoming just as important as dressing elegantly.", translation: "A divatipar jelentős hatással van a környezetre, amit sok fogyasztó kezd felismerni. A 'fast fashion' arra ösztönzi az embereket, hogy olcsó ruhákat vásároljanak és gyorsan dobják ki őket, ami hatalmas hulladékhoz vezet. Ennek leküzdésére elkezdtem egy kapszulagardrób építését kiváló minőségű, időtálló darabokból. Szeretek használtruha-boltban is vásárolni, ami fenntartható és egyedi személyes stílust tesz lehetővé. Az etikus öltözködés kezd ugyanolyan fontossá válni, mint az elegáns öltözködés." }
+            ],
+            'C1': [
+                { text: "The ubiquity of social media has transformed how people communicate, consume news and mobilise politically; yet it has also generated harms—misinformation, targeted manipulation and opacity around algorithms. Given the social and economic power wielded by a handful of platforms, there is a compelling argument for government regulation. However, regulation must be carefully designed to protect free expression and innovation while addressing demonstrable harms.", translation: "A közösségi média mindenütt jelenvalósága átalakította az emberek kommunikációját, hírfogyasztását és politikai mozgósítását; ugyanakkor károkat is okozott – félretájékoztatást, célzott manipulációt és az algoritmusok átláthatatlanságát. Tekintettel a néhány platform által gyakorolt társadalmi és gazdasági hatalomra, nyomós érv szól a kormányzati szabályozás mellett. A szabályozást azonban gondosan kell megtervezni, hogy védje a véleménynyilvánítás szabadságát és az innovációt, miközben kezeli a bizonyítható károkat." },
+                { text: "First, regulation is justified because certain market failures and negative externalities are not resolved by market forces alone. Platforms benefit from network effects and economies of scale that entrench market dominance, reducing incentives to moderate content responsibly or to be transparent about ad-targeting practices. Without oversight, users and even democratic institutions can be damaged by unchecked misinformation campaigns and opaque data practices.", translation: "Először is, a szabályozás indokolt, mert bizonyos piaci kudarcokat és negatív externáliákat a piaci erők önmagukban nem oldanak meg. A platformok profitálnak a hálózati hatásokból és a méretgazdaságosságból, amelyek megszilárdítják a piaci dominanciát, csökkentve a tartalom felelős moderálására vagy a hirdetéscélzási gyakorlatok átláthatóságára vonatkozó ösztönzőket. Felügyelet nélkül a felhasználók, sőt a demokratikus intézmények is sérülhetnek az ellenőrizetlen félretájékoztatási kampányok és az átláthatatlan adatkezelési gyakorlatok miatt." }
+            ],
+            'C2': [
+                { text: "Demographic ageing—the rising proportion of elderly people within a population—presents complex cultural and economic challenges for developed countries. While longer life expectancy is a triumph of public health and living standards, ageing populations reshape labour markets, public finances and social norms. Policymakers must therefore formulate integrated strategies that maintain fiscal sustainability, support intergenerational equity and harness the opportunities created by an ageing society.", translation: "A demográfiai elöregedés – az idősek arányának növekedése a népességen belül – összetett kulturális és gazdasági kihívásokat jelent a fejlett országok számára. Bár a hosszabb várható élettartam a közegészségügy és az életszínvonal diadala, az elöregedő népesség átformálja a munkaerőpiacokat, az államháztartást és a társadalmi normákat. A politikai döntéshozóknak ezért olyan integrált stratégiákat kell kidolgozniuk, amelyek fenntartják a költségvetési fenntarthatóságot, támogatják a generációk közötti méltányosságot, és kiaknázzák az elöregedő társadalom által teremtett lehetőségeket." },
+                { text: "Economically, an ageing population affects both the supply and demand sides. On the supply side, a declining working-age population can reduce labour availability and slow potential growth. Employers in many sectors already report shortages of skilled and semi-skilled workers, which may push up wages and production costs, particularly in labour-intensive industries such as healthcare and construction. On the demand side, consumption patterns shift: older cohorts tend to spend more on health and housing adaptations and less on durable goods.", translation: "Gazdaságilag az elöregedő népesség mind a kínálati, mind a keresleti oldalt érinti. A kínálati oldalon a csökkenő munkaképes korú népesség csökkentheti a munkaerő rendelkezésre állását és lassíthatja a potenciális növekedést. Sok ágazatban a munkaadók már most is szakképzett és betanított munkások hiányáról számolnak be, ami felhajthatja a béreket és a termelési költségeket, különösen a munkaerő-igényes iparágakban, mint például az egészségügy és az építőipar. A keresleti oldalon a fogyasztási szokások megváltoznak: az idősebb korosztályok hajlamosak többet költeni egészségügyre és lakhatási átalakításokra, és kevesebbet tartós fogyasztási cikkekre." }
             ]
         };
 
@@ -708,6 +759,22 @@
                 "He acts as if he were the boss.", "Suppose you won the lottery what would you do?", "It is about time we started the project.",
                 "Rarely do we see such talent.", "She objected to being treated like a child.", "Having finished his work he went home.",
                 "Whatever you do do not give up.", "Should you need any help please let me know."
+            ],
+            'C1': [
+                "Not only did he win the competition but he also broke the record.", "Had I known about the meeting I would have attended.",
+                "The government is considering implementing stricter regulations.", "It is vital that we address the issue immediately.",
+                "She is believed to be the best candidate for the job.", "Seldom have I seen such a beautiful painting.",
+                "Under no circumstances should you open this door.", "I would rather you did not smoke in here.",
+                "By the time you arrive I will have finished the work.", "He was so tired that he fell asleep immediately.",
+                "Only when I arrived home did I realize I had lost my keys.", "It is essential that everyone be informed about the changes."
+            ],
+            'C2': [
+                "Scarcely had the ceremony begun when the rain started falling.", "It is imperative that the committee reach a consensus immediately.",
+                "Under no circumstances are you to reveal this information.", "Little did he know that his life was about to change forever.",
+                "Were it not for your assistance I would not have succeeded.", "Such was the force of the storm that trees were uprooted.",
+                "No sooner had I sat down than the phone rang.", "Whatever happens I will always support you.",
+                "Should you require any further information please do not hesitate to contact me.", "Had it not been for the quick reaction of the driver the accident would have been fatal.",
+                "Not for a moment did I imagine that we would win the lottery.", "Strange as it may seem I actually enjoy working on weekends."
             ]
         };
 
