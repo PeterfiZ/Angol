@@ -71,6 +71,46 @@
         .vocab-table th, .vocab-table td { padding: 8px; border-bottom: 1px solid #eee; }
         .vocab-table th { background-color: #f8f9fa; color: #444; }
         .vocab-level-header { background-color: #4CAF50; color: white; padding: 8px 12px; margin-top: 20px; border-radius: 4px; font-weight: bold; text-align: left; }
+        .sentence-area {
+            min-height: 60px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            background-color: #fff;
+            align-items: center;
+        }
+        .word-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 25px;
+            min-height: 50px;
+        }
+        .word-chip {
+            background-color: #e3f2fd;
+            color: #1565c0;
+            border: 1px solid #bbdefb;
+            border-radius: 20px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 16px;
+            user-select: none;
+            transition: transform 0.1s, background-color 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .word-chip:hover {
+            background-color: #bbdefb;
+            transform: translateY(-2px);
+        }
+        .word-chip:active {
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body>
@@ -87,7 +127,7 @@
         <button class="btn" onclick="startLevel('A1')">A1 - Kezdő</button>
         <button class="btn" onclick="startLevel('A2')">A2 - Alapfok</button>
         <button class="btn" onclick="startLevel('B1')">B1 - Középfok (Eleje)</button>
-        <button class="btn" onclick="startLevel('B2')">B2 - Középfok (Vége)</button>
+    <button class="btn" onclick="startLevel('B2')">B2 - Középfok (Vége)</button>
 
         <h3 style="margin-top: 25px; color: #444;">📖 1 Perces Olvasási Gyakorlat</h3>
         <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
@@ -95,6 +135,14 @@
             <button class="btn" style="width: auto; min-width: 60px;" onclick="startReading('A2')">A2</button>
             <button class="btn" style="width: auto; min-width: 60px;" onclick="startReading('B1')">B1</button>
             <button class="btn" style="width: auto; min-width: 60px;" onclick="startReading('B2')">B2</button>
+        </div>
+
+        <h3 style="margin-top: 25px; color: #444;">🧩 Mondatépítő</h3>
+        <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+            <button class="btn" style="width: auto; min-width: 60px;" onclick="startSentenceBuilder('A1')">A1</button>
+            <button class="btn" style="width: auto; min-width: 60px;" onclick="startSentenceBuilder('A2')">A2</button>
+            <button class="btn" style="width: auto; min-width: 60px;" onclick="startSentenceBuilder('B1')">B1</button>
+            <button class="btn" style="width: auto; min-width: 60px;" onclick="startSentenceBuilder('B2')">B2</button>
         </div>
 
         <div style="margin-top: 20px;">
@@ -109,6 +157,11 @@
             </ul>
             <button onclick="clearStats()" style="background: none; border: none; color: #999; font-size: 0.8em; cursor: pointer; margin-top: 5px; text-decoration: underline;">Statisztika törlése</button>
         </div>
+
+        <footer style="margin-top: 25px; font-size: 0.85em; color: #888; border-top: 1px solid #eee; padding-top: 15px;">
+            <p style="margin: 0 0 5px 0;">Készítette: Dr. Péterfi Zoltán</p>
+            <p style="margin: 0;">Verzió: 1.3.0</p>
+        </footer>
     </div>
 
     <!-- Kvíz felület -->
@@ -144,6 +197,25 @@
         <button class="btn" style="background-color: #777; margin-top: 20px;" onclick="showMenu()">Vissza a menübe</button>
     </div>
 
+    <!-- Mondatépítő felület -->
+    <div class="container hidden" id="sentence-builder">
+        <h2 id="sb-level-title">Mondatépítő</h2>
+        <p style="color: #666; font-size: 0.9em;">Kattints a szavakra a helyes sorrend összeállításához!</p>
+        
+        <div id="sb-target" class="sentence-area"></div>
+        <div id="sb-pool" class="word-pool"></div>
+        
+        <p id="sb-feedback"></p>
+
+        <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
+            <button class="btn" onclick="checkSentenceOrder()" style="background-color: #4CAF50; width: auto; flex: 1;">Ellenőrzés</button>
+            <button class="btn" onclick="resetSentenceTask()" style="background-color: #FF9800; width: auto; flex: 1;">Újra</button>
+        </div>
+        
+        <button class="btn hidden" id="sb-next-btn" onclick="nextSentenceTask()">Következő</button>
+        <button class="btn" style="background-color: #777; margin-top: 20px;" onclick="showMenu()">Vissza a menübe</button>
+    </div>
+
     <!-- Szókincs felület -->
     <div class="container hidden" id="vocabulary-view" style="max-width: 800px;">
         <h2>Szókincs és Nyelvtan</h2>
@@ -154,30 +226,9 @@
     <script>
         // Adatbázis a szintekhez (bővíthető)
         const database = {
-            'A1': [
+            'A1': [ 
                 { q: "Apple", options: ["Körte", "Alma", "Szőlő"], a: 1 },
-                { q: "Good morning", options: ["Jó reggelt", "Jó estét", "Viszlát"], a: 0 },
-                { q: "I am happy", options: ["Éhes vagyok", "Boldog vagyok", "Fáradt vagyok"], a: 1 },
-                { q: "Red", options: ["Kék", "Piros", "Zöld"], a: 1 },
-                { q: "Thank you", options: ["Kérem", "Köszönöm", "Bocsánat"], a: 1 },
-                { q: "Where is the station?", options: ["Hol van az állomás?", "Mikor indul a vonat?", "Ez az állomás?"], a: 0 },
-                { q: "Blue", options: ["Sárga", "Kék", "Fekete"], a: 1 },
-                { q: "Dog", options: ["Macska", "Kutya", "Madár"], a: 1 },
-                { q: "My name is...", options: ["A nevem...", "Én vagyok...", "Jól vagyok..."], a: 0 },
-                { q: "Cat", options: ["Kutya", "Macska", "Egér"], a: 1 },
-                { q: "One", options: ["Egy", "Kettő", "Három"], a: 0 },
-                { q: "Sister", options: ["Fiútestvér", "Lánytestvér", "Anya"], a: 1 },
-                { q: "House", options: ["Ház", "Lakás", "Kert"], a: 0 },
-                { q: "To eat", options: ["Inni", "Enni", "Aludni"], a: 1 },
-                { q: "Milk", options: ["Víz", "Tej", "Sör"], a: 1 },
-                { q: "Small", options: ["Nagy", "Kicsi", "Hosszú"], a: 1 },
-                { q: "Goodbye", options: ["Szia", "Viszlát", "Jó éjszakát"], a: 1 },
-                { q: "Book", options: ["Füzet", "Toll", "Könyv"], a: 2 },
-                { q: "Water", options: ["Víz", "Tűz", "Föld"], a: 0 },
-                { q: "She ___ a teacher.", options: ["is", "are", "am"], a: 0 },
-                { q: "They ___ football every day.", options: ["plays", "play", "playing"], a: 1 },
-                { q: "___ you like coffee?", options: ["Does", "Is", "Do"], a: 2 },
-                { q: "I ___ a student.", options: ["is", "am", "are"], a: 1 },
+                { q: "I ___ a student.", options: ["is", "am", "are"], a: 1 }, 
                 { q: "___ is your name?", options: ["Who", "What", "How"], a: 1 },
                 { q: "They ___ not at home.", options: ["is", "am", "are"], a: 2 },
                 { q: "Yellow", options: ["Sárga", "Zöld", "Fekete"], a: 0 },
@@ -264,7 +315,27 @@
                 { q: "How much?", options: ["Hány óra?", "Mennyibe kerül?", "Hogy vagy?"], a: 1 },
                 { q: "Bag", options: ["Cipő", "Táska/Szatyor", "Kalap"], a: 1 },
                 { q: "Sale", options: ["Akció/Kiárusítás", "Drága", "Zárva"], a: 0 },
-                { q: "Card", options: ["Kártya", "Pénz", "Papír"], a: 0 }
+                { q: "Card", options: ["Kártya", "Pénz", "Papír"], a: 0 },
+                { q: "Milk", options: ["Víz", "Tej", "Sör"], a: 1 },
+                { q: "Cheese", options: ["Sajt", "Vaj", "Kenyér"], a: 0 },
+                { q: "Chicken", options: ["Marha", "Sertés", "Csirke"], a: 2 },
+                { q: "Fish", options: ["Hal", "Madár", "Kutya"], a: 0 },
+                { q: "Egg", options: ["Liszt", "Cukor", "Tojás"], a: 2 },
+                { q: "Cake", options: ["Süti/Torta", "Kenyér", "Leves"], a: 0 },
+                { q: "Coffee", options: ["Tea", "Kávé", "Víz"], a: 1 },
+                { q: "To cook", options: ["Főzni", "Enni", "Inni"], a: 0 },
+                { q: "To drink", options: ["Eszik", "Iszik", "Alszik"], a: 1 },
+                { q: "To eat", options: ["Főzni", "Enni", "Vásárolni"], a: 1 },
+                { q: "Bus", options: ["Autó", "Busz", "Vonat"], a: 1 },
+                { q: "Train", options: ["Repülő", "Hajó", "Vonat"], a: 2 },
+                { q: "Ticket", options: ["Jegy", "Útlevél", "Pénz"], a: 0 },
+                { q: "Hotel", options: ["Szálloda", "Otthon", "Iskola"], a: 0 },
+                { q: "Room", options: ["Ház", "Szoba", "Kert"], a: 1 },
+                { q: "Sea", options: ["Folyó", "Tó", "Tenger"], a: 2 },
+                { q: "Sun", options: ["Hold", "Nap", "Csillag"], a: 1 },
+                { q: "Beach", options: ["Hegy", "Erdő", "Tengerpart/Strand"], a: 2 },
+                { q: "Taxi", options: ["Busz", "Taxi", "Metró"], a: 1 },
+                { q: "City", options: ["Falu", "Város", "Ország"], a: 1 }
             ],
             'A2': [
                 { q: "Yesterday", options: ["Holnap", "Tegnap", "Ma"], a: 1 },
@@ -564,29 +635,77 @@
 
         const readingDatabase = {
             'A1': [
-                "My name is Peter. I am from Hungary. I live in a small house with my family. I have a dog and a cat. Every day, I go to school. I like learning English. In the afternoon, I play football with my friends. My favorite food is pizza. I usually go to bed at nine o'clock.",
-                "This is my room. It is small but nice. There is a bed, a desk, and a chair. I have many books on the shelf. I like reading in the evening. My computer is on the desk. I use it to do my homework. The walls are blue. I love my room because it is quiet.",
-                "I go shopping on Saturdays. I go to the supermarket with my mother. We buy bread, milk, and fruit. I like apples and bananas. Sometimes we buy chocolate too. The supermarket is big. There are many people there. After shopping, we go home and cook lunch.",
-                "I love playing games with my friends. We usually play football in the park on Sundays. When it rains, we stay inside and play video games. My favorite game is about building cities. It is very fun and exciting. Sometimes we play board games too. I like winning, but having fun is more important."
+                { text: "My name is Peter. I am from Hungary. I live in a small house with my family. I have a dog and a cat. Every day, I go to school. I like learning English. In the afternoon, I play football with my friends. My favorite food is pizza. I usually go to bed at nine o'clock.", translation: "A nevem Péter. Magyarországról származom. Egy kis házban élek a családommal. Van egy kutyám és egy macskám. Minden nap iskolába megyek. Szeretek angolul tanulni. Délután focizom a barátaimmal. A kedvenc ételem a pizza. Általában kilenc órakor fekszem le." },
+                { text: "This is my room. It is small but nice. There is a bed, a desk, and a chair. I have many books on the shelf. I like reading in the evening. My computer is on the desk. I use it to do my homework. The walls are blue. I love my room because it is quiet.", translation: "Ez a szobám. Kicsi, de kedves. Van benne egy ágy, egy íróasztal és egy szék. Sok könyvem van a polcon. Szeretek este olvasni. A számítógépem az íróasztalon van. A házi feladatom elkészítésére használom. A falak kékek. Szeretem a szobámat, mert csendes." },
+                { text: "I go shopping on Saturdays. I go to the supermarket with my mother. We buy bread, milk, and fruit. I like apples and bananas. Sometimes we buy chocolate too. The supermarket is big. There are many people there. After shopping, we go home and cook lunch.", translation: "Szombatonként vásárolni megyek. Az édesanyámmal megyek a szupermarketbe. Kenyeret, tejet és gyümölcsöt veszünk. Szeretem az almát és a banánt. Néha csokoládét is veszünk. A szupermarket nagy. Sok ember van ott. Vásárlás után hazamegyünk és ebédet főzünk." },
+                { text: "I love playing games with my friends. We usually play football in the park on Sundays. When it rains, we stay inside and play video games. My favorite game is about building cities. It is very fun and exciting. Sometimes we play board games too. I like winning, but having fun is more important.", translation: "Szeretek játszani a barátaimmal. Vasárnaponként általában focizunk a parkban. Ha esik az eső, bent maradunk és videojátékokkal játszunk. A kedvenc játékom városok építéséről szól. Nagyon szórakoztató és izgalmas. Néha társasjátékokkal is játszunk. Szeretek nyerni, de a szórakozás fontosabb." }
             ],
             'A2': [
-                "Last summer, I went to Lake Balaton with my friends. We travelled by train. The weather was very hot and sunny. We swam in the lake every day and ate lángos. In the evenings, we walked on the beach and talked. It was a fantastic holiday. I want to go back next year.",
-                "I work in an office in the city center. I usually wake up at six o'clock. I take the bus to work. It takes about thirty minutes. My job is interesting but sometimes stressful. I have to answer many emails and talk to clients. At lunch, I usually eat a sandwich in the park.",
-                "My favorite hobby is cooking. I learned to cook from my grandmother. She makes the best soup in the world. I like trying new recipes from different countries. Last week, I made Italian pasta. My family loved it. Cooking relaxes me after a long day at work.",
-                "Last weekend, I went to the new shopping center in the city. I needed a new pair of shoes for work. There were many sales, so the shops were full of people. I found comfortable black shoes at a good price. I also bought a birthday present for my mother. Shopping can be tiring, but I enjoy finding good deals."
+                { text: "Last summer, I went to Lake Balaton with my friends. We travelled by train. The weather was very hot and sunny. We swam in the lake every day and ate lángos. In the evenings, we walked on the beach and talked. It was a fantastic holiday. I want to go back next year.", translation: "Tavaly nyáron a Balatonnál voltam a barátaimmal. Vonattal utaztunk. Az idő nagyon meleg és napos volt. Minden nap úsztunk a tóban és lángost ettünk. Esténként a parton sétáltunk és beszélgettünk. Fantasztikus nyaralás volt. Jövőre vissza akarok menni." },
+                { text: "I work in an office in the city center. I usually wake up at six o'clock. I take the bus to work. It takes about thirty minutes. My job is interesting but sometimes stressful. I have to answer many emails and talk to clients. At lunch, I usually eat a sandwich in the park.", translation: "Egy irodában dolgozom a belvárosban. Általában hat órakor ébredek. Busszal megyek dolgozni. Körülbelül harminc percig tart. A munkám érdekes, de néha stresszes. Sok e-mailre kell válaszolnom és ügyfelekkel beszélnem. Ebédidőben általában szendvicset eszem a parkban." },
+                { text: "My favorite hobby is cooking. I learned to cook from my grandmother. She makes the best soup in the world. I like trying new recipes from different countries. Last week, I made Italian pasta. My family loved it. Cooking relaxes me after a long day at work.", translation: "A kedvenc hobbim a főzés. A nagymamámtól tanultam főzni. Ő készíti a világ legjobb levesét. Szeretek új recepteket kipróbálni különböző országokból. Múlt héten olasz tésztát készítettem. A családom imádta. A főzés kikapcsol egy hosszú munkanap után." },
+                { text: "Last weekend, I went to the new shopping center in the city. I needed a new pair of shoes for work. There were many sales, so the shops were full of people. I found comfortable black shoes at a good price. I also bought a birthday present for my mother. Shopping can be tiring, but I enjoy finding good deals.", translation: "Múlt hétvégén elmentem az új bevásárlóközpontba a városban. Szükségem volt egy új pár cipőre a munkához. Sok leárazás volt, így az üzletek tele voltak emberekkel. Találtam egy kényelmes fekete cipőt jó áron. Vettem egy születésnapi ajándékot is az édesanyámnak. A vásárlás fárasztó lehet, de élvezem a jó ajánlatok megtalálását." }
             ],
             'B1': [
-                "Dear Sir or Madam, I am writing to complain about the service at your restaurant. I visited your establishment last Friday with my family. We had to wait forty minutes for a table, even though we had a reservation. Furthermore, the food was cold when it arrived. I hope you will improve your service in the future. Sincerely, Anna Kovács.",
-                "Living in a big city has both advantages and disadvantages. On the one hand, there are many job opportunities and entertainment options. You can go to theaters, museums, and cinemas easily. On the other hand, the traffic is often terrible, and the air is polluted. It is also more expensive to live in a city than in the countryside.",
-                "I have been learning English for five years. I think it is very important to speak foreign languages. It helps you when you travel abroad and when you are looking for a job. I try to watch movies in English to improve my listening skills. I also read articles on the internet. My goal is to pass the language exam next year.",
-                "Learning a new skill requires patience and dedication. Whether it is playing an instrument or speaking a foreign language, practice is essential. I recently started learning how to code. At first, it was very difficult, and I made many mistakes. However, I didn't give up. Now I can create simple programs, and I feel very proud of my progress. Lifelong learning keeps the mind active.",
-                "Maintaining a healthy diet is important for both physical and mental health. I try to cook my own meals using fresh ingredients like vegetables, lean meat, and whole grains. Although I love sweets, I try to limit my sugar intake. On weekends, I enjoy experimenting with new recipes from different cultures. Eating together with family is a great way to relax and talk about our day."
+                { text: "Dear Sir or Madam, I am writing to complain about the service at your restaurant. I visited your establishment last Friday with my family. We had to wait forty minutes for a table, even though we had a reservation. Furthermore, the food was cold when it arrived. I hope you will improve your service in the future. Sincerely, Anna Kovács.", translation: "Tisztelt Hölgyem/Uram! Azért írok, hogy panaszt tegyek az éttermükben tapasztalt kiszolgálás miatt. Múlt pénteken látogattam el a létesítményükbe a családommal. Negyven percet kellett várnunk egy asztalra, annak ellenére, hogy volt foglalásunk. Továbbá az étel hideg volt, amikor megérkezett. Remélem, a jövőben javítani fognak a szolgáltatásukon. Üdvözlettel: Kovács Anna." },
+                { text: "Living in a big city has both advantages and disadvantages. On the one hand, there are many job opportunities and entertainment options. You can go to theaters, museums, and cinemas easily. On the other hand, the traffic is often terrible, and the air is polluted. It is also more expensive to live in a city than in the countryside.", translation: "A nagyvárosi életnek vannak előnyei és hátrányai is. Egyrészt sok munkalehetőség és szórakozási lehetőség van. Könnyen eljuthatsz színházakba, múzeumokba és mozikba. Másrészt a forgalom gyakran szörnyű, és a levegő szennyezett. Városban élni drágább is, mint vidéken." },
+                { text: "I have been learning English for five years. I think it is very important to speak foreign languages. It helps you when you travel abroad and when you are looking for a job. I try to watch movies in English to improve my listening skills. I also read articles on the internet. My goal is to pass the language exam next year.", translation: "Öt éve tanulok angolul. Szerintem nagyon fontos idegen nyelveket beszélni. Segít, amikor külföldre utazol, és amikor munkát keresel. Próbálok angol nyelvű filmeket nézni, hogy fejlesszem a hallásértésemet. Cikkeket is olvasok az interneten. A célom, hogy jövőre letegyem a nyelvvizsgát." },
+                { text: "Learning a new skill requires patience and dedication. Whether it is playing an instrument or speaking a foreign language, practice is essential. I recently started learning how to code. At first, it was very difficult, and I made many mistakes. However, I didn't give up. Now I can create simple programs, and I feel very proud of my progress. Lifelong learning keeps the mind active.", translation: "Egy új készség elsajátítása türelmet és elhivatottságot igényel. Legyen szó hangszeren játszásról vagy idegen nyelv beszéléséről, a gyakorlás elengedhetetlen. Nemrég elkezdtem programozni tanulni. Eleinte nagyon nehéz volt, és sok hibát vétettem. Azonban nem adtam fel. Most már egyszerű programokat tudok készíteni, és nagyon büszke vagyok a fejlődésemre. Az élethosszig tartó tanulás aktívan tartja az elmét." },
+                { text: "Maintaining a healthy diet is important for both physical and mental health. I try to cook my own meals using fresh ingredients like vegetables, lean meat, and whole grains. Although I love sweets, I try to limit my sugar intake. On weekends, I enjoy experimenting with new recipes from different cultures. Eating together with family is a great way to relax and talk about our day.", translation: "Az egészséges étrend fenntartása fontos mind a fizikai, mind a mentális egészség szempontjából. Igyekszem saját magam főzni friss alapanyagokból, mint például zöldségek, sovány húsok és teljes kiőrlésű gabonák. Bár szeretem az édességeket, próbálom korlátozni a cukorbevitelemet. Hétvégente élvezem az új receptekkel való kísérletezést különböző kultúrákból. A családdal való közös étkezés remek módja a kikapcsolódásnak és a napunk megbeszélésének." }
             ],
             'B2': [
-                "The impact of social media on teenagers is a widely debated topic. While these platforms offer a way to stay connected, they can also lead to anxiety and depression. The pressure to present a perfect life online often makes young people feel inadequate. Moreover, cyberbullying is a serious issue that affects many students. Parents and educators need to work together to teach responsible internet usage.",
-                "Climate change is arguably the most pressing challenge of our time. Rising global temperatures are causing more frequent and severe weather events, such as hurricanes and droughts. To mitigate these effects, we must transition to renewable energy sources and reduce our carbon footprint. Individual actions, like recycling and using public transport, are important, but systemic change is essential for a sustainable future.",
-                "Remote work has become increasingly popular in recent years. For many employees, the flexibility to work from home is a major benefit. It saves time on commuting and allows for a better work-life balance. However, some argue that it reduces collaboration and makes it harder to separate professional and personal life. Companies are now exploring hybrid models to combine the best of both worlds.",
-                "The fashion industry has a significant impact on the environment, a fact that many consumers are beginning to realize. Fast fashion encourages people to buy cheap clothes and discard them quickly, leading to massive waste. To combat this, I have started building a capsule wardrobe with high-quality, timeless pieces. I also enjoy thrift shopping, which is both sustainable and allows for a unique personal style. Dressing ethically is becoming just as important as dressing elegantly."
+                { text: "The impact of social media on teenagers is a widely debated topic. While these platforms offer a way to stay connected, they can also lead to anxiety and depression. The pressure to present a perfect life online often makes young people feel inadequate. Moreover, cyberbullying is a serious issue that affects many students. Parents and educators need to work together to teach responsible internet usage.", translation: "A közösségi média hatása a tinédzserekre széles körben vitatott téma. Bár ezek a platformok lehetőséget kínálnak a kapcsolattartásra, szorongáshoz és depresszióhoz is vezethetnek. A tökéletes élet online bemutatásának kényszere miatt a fiatalok gyakran alkalmatlannak érzik magukat. Ráadásul az internetes zaklatás komoly probléma, amely sok diákot érint. A szülőknek és a pedagógusoknak együtt kell működniük a felelős internethasználat megtanítása érdekében." },
+                { text: "Climate change is arguably the most pressing challenge of our time. Rising global temperatures are causing more frequent and severe weather events, such as hurricanes and droughts. To mitigate these effects, we must transition to renewable energy sources and reduce our carbon footprint. Individual actions, like recycling and using public transport, are important, but systemic change is essential for a sustainable future.", translation: "Az éghajlatváltozás vitathatatlanul korunk legsürgetőbb kihívása. A globális hőmérséklet emelkedése gyakoribb és súlyosabb időjárási eseményeket okoz, például hurrikánokat és aszályokat. E hatások mérséklése érdekében át kell térnünk a megújuló energiaforrásokra, és csökkentenünk kell a szénlábnyomunkat. Az egyéni cselekvések, mint az újrahasznosítás és a tömegközlekedés használata fontosak, de a rendszerszintű változás elengedhetetlen a fenntartható jövőhöz." },
+                { text: "Remote work has become increasingly popular in recent years. For many employees, the flexibility to work from home is a major benefit. It saves time on commuting and allows for a better work-life balance. However, some argue that it reduces collaboration and makes it harder to separate professional and personal life. Companies are now exploring hybrid models to combine the best of both worlds.", translation: "A távmunka egyre népszerűbbé vált az elmúlt években. Sok munkavállaló számára az otthoni munkavégzés rugalmassága jelentős előny. Időt takarít meg az ingázáson, és jobb munka-magánélet egyensúlyt tesz lehetővé. Egyesek azonban úgy vélik, hogy csökkenti az együttműködést, és megnehezíti a szakmai és a magánélet szétválasztását. A vállalatok most hibrid modelleket vizsgálnak, hogy ötvözzék a két világ legjobbjait." },
+                { text: "The fashion industry has a significant impact on the environment, a fact that many consumers are beginning to realize. Fast fashion encourages people to buy cheap clothes and discard them quickly, leading to massive waste. To combat this, I have started building a capsule wardrobe with high-quality, timeless pieces. I also enjoy thrift shopping, which is both sustainable and allows for a unique personal style. Dressing ethically is becoming just as important as dressing elegantly.", translation: "A divatipar jelentős hatással van a környezetre, amit sok fogyasztó kezd felismerni. A 'fast fashion' arra ösztönzi az embereket, hogy olcsó ruhákat vásároljanak és gyorsan dobják ki őket, ami hatalmas hulladékhoz vezet. Ennek leküzdésére elkezdtem egy kapszulagardrób építését kiváló minőségű, időtálló darabokból. Szeretek használtruha-boltban is vásárolni, ami fenntartható és egyedi személyes stílust tesz lehetővé. Az etikus öltözködés kezd ugyanolyan fontossá válni, mint az elegáns öltözködés." }
+            ]
+        };
+
+        const sentenceDatabase = {
+            'A1': [
+                "I like apples.", "My name is Peter.", "The cat is black.", "I have a dog.", "She is my sister.",
+                "The sun is hot.", "I go to school.", "This is a book.", "He is happy.", "We are friends.",
+                "The sky is blue.", "I drink milk every day.", "She has a red pen.", "We live in a big city.",
+                "He plays football on Mondays.", "My father is a doctor.", "They are at home.", "The dog is under the table.",
+                "I want a new bike.", "It is cold today.", "My mother cooks lunch.", "The bird sings a song.",
+                "I see a green car.", "She likes chocolate cake.", "We walk to the park.", "The flower is beautiful.",
+                "He reads a book.", "I have two brothers.", "The water is warm.", "They speak English."
+            ],
+            'A2': [
+                "I went to the cinema yesterday.", "She is taller than me.", "We are watching TV now.", 
+                "Have you ever been to London?", "I did not see him.", "My mother is cooking dinner.",
+                "He was reading a book.", "They are playing football.", "I will buy a new car.", "She can swim very well.",
+                "I am going to visit my grandma.", "Did you see the movie last night?", "She was sleeping when I arrived.",
+                "This house is bigger than yours.", "We will travel to Spain next summer.", "He has already finished his homework.",
+                "I was not hungry so I did not eat.", "Are you listening to me?", "They were walking in the forest.",
+                "She bought a beautiful dress yesterday.", "I have never eaten sushi before.", "The weather will be sunny tomorrow.",
+                "He is the fastest runner in the school.", "We are having a party on Saturday.", "She did not like the food.",
+                "I was working all day yesterday.", "Have you seen my keys anywhere?", "They are going to buy a new house.",
+                "He is more intelligent than his brother.", "I will call you later."
+            ],
+            'B1': [
+                "I have lived here for ten years.", "If it rains we will stay at home.", "I look forward to seeing you.",
+                "This is the book which I bought.", "He stopped smoking last year.", "I used to play tennis.",
+                "She asked me if I could help.", "The car is being repaired.", "I have never been to Paris.", "You should study harder.",
+                "I have been waiting for you for an hour.", "If I were you I would tell the truth.", "The letter was written by my friend.",
+                "She said that she was tired.", "You must not smoke in this room.", "I enjoy reading books in my free time.",
+                "He managed to fix the car by himself.", "We might go to the beach if it is sunny.", "I have not seen him since last week.",
+                "The house was built in nineteen ninety.", "She asked me where I lived.", "I would have called you if I had known.",
+                "You ought to apologize to her.", "He is interested in learning history.", "The problem has been solved recently.",
+                "I regret not studying harder for the exam.", "She is capable of doing great things.", "We are looking forward to the holiday.",
+                "It is important to eat healthy food.", "I wish I had more time."
+            ],
+            'B2': [
+                "He is believed to be rich.", "Had I known I would have helped.", "Not only was he late but he also forgot his book.",
+                "It is high time we went home.", "Despite the rain we went out.", "I would rather you did not smoke.",
+                "No sooner had I arrived than he left.", "She is accused of stealing the money.", "It is likely to rain tomorrow.", "He is said to be a genius.",
+                "Never have I seen such a beautiful sunset.", "It was Mary who solved the problem.", "Under no circumstances should you open this door.",
+                "Little did he know about the surprise.", "She is thought to be the best candidate.", "I wish I had not said that to him.",
+                "Had he studied harder he would have passed.", "Not until yesterday did I realize the truth.", "It is essential that he be present at the meeting.",
+                "She denied having stolen the jewelry.", "Only by working hard can you succeed.", "The more you practice the better you become.",
+                "He acts as if he were the boss.", "Suppose you won the lottery what would you do?", "It is about time we started the project.",
+                "Rarely do we see such talent.", "She objected to being treated like a child.", "Having finished his work he went home.",
+                "Whatever you do do not give up.", "Should you need any help please let me know."
             ]
         };
 
@@ -601,6 +720,11 @@
         
         let readingTimerInterval;
         let currentReadingLevel = "";
+
+        let currentSentenceList = [];
+        let currentSentenceIndex = 0;
+        let currentTargetWords = [];
+        let currentPoolWords = [];
 
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -745,6 +869,20 @@
             document.getElementById('menu').classList.remove('hidden');
             document.getElementById('reading-practice').classList.add('hidden');
             document.getElementById('vocabulary-view').classList.add('hidden');
+            document.getElementById('sentence-builder').classList.add('hidden');
+            clearInterval(readingTimerInterval);
+        }
+
+        // Show custom task sections (C1 / C2)
+        function showTasks(id) {
+            clearInterval(timerInterval);
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            document.getElementById('quiz').classList.add('hidden');
+            document.getElementById('reading-practice').classList.add('hidden');
+            document.getElementById('vocabulary-view').classList.add('hidden');
+            document.getElementById('menu').classList.add('hidden');
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('hidden');
             clearInterval(readingTimerInterval);
         }
 
@@ -764,8 +902,31 @@
             document.getElementById('new-text-btn').classList.add('hidden');
             
             const texts = readingDatabase[currentReadingLevel];
-            const randomText = texts[Math.floor(Math.random() * texts.length)];
-            document.getElementById('reading-content').innerText = randomText;
+            const randomItem = texts[Math.floor(Math.random() * texts.length)];
+            
+            const englishText = randomItem.text;
+            const hungarianText = randomItem.translation;
+
+            const contentDiv = document.getElementById('reading-content');
+            contentDiv.innerHTML = `
+                <div id="reading-text-en">${englishText}</div>
+                <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px;">
+                    <button id="trans-btn" class="btn-option" style="width: auto; font-size: 0.9em; padding: 8px 15px;" onclick="toggleTranslation()">Fordítás megjelenítése 👁️</button>
+                    <div id="reading-text-hu" class="hidden" style="margin-top: 10px; color: #444; font-style: italic;">${hungarianText}</div>
+                </div>
+            `;
+        }
+
+        function toggleTranslation() {
+            const huText = document.getElementById('reading-text-hu');
+            const btn = document.getElementById('trans-btn');
+            if (huText.classList.contains('hidden')) {
+                huText.classList.remove('hidden');
+                btn.innerText = "Fordítás elrejtése 🙈";
+            } else {
+                huText.classList.add('hidden');
+                btn.innerText = "Fordítás megjelenítése 👁️";
+            }
         }
 
         function startReadingTimer() {
@@ -790,11 +951,113 @@
 
         function speakReadingText() {
             if ('speechSynthesis' in window) {
-                const text = document.getElementById('reading-content').innerText;
+                const enDiv = document.getElementById('reading-text-en');
+                const text = enDiv ? enDiv.innerText : document.getElementById('reading-content').innerText;
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'en-US';
                 window.speechSynthesis.cancel();
                 window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Mondatépítő funkciók
+        function startSentenceBuilder(level) {
+            currentLevel = level;
+            currentSentenceList = [...sentenceDatabase[level]];
+            shuffleArray(currentSentenceList);
+            currentSentenceIndex = 0;
+            
+            document.getElementById('menu').classList.add('hidden');
+            document.getElementById('sentence-builder').classList.remove('hidden');
+            document.getElementById('sb-level-title').innerText = level + " Szint - Mondatépítő";
+            
+            loadSentenceTask();
+        }
+
+        function loadSentenceTask() {
+            const sentence = currentSentenceList[currentSentenceIndex];
+            const words = sentence.split(' ');
+            
+            currentPoolWords = [...words];
+            shuffleArray(currentPoolWords);
+            currentTargetWords = [];
+            
+            renderSentenceBuilder();
+            document.getElementById('sb-feedback').innerText = "";
+            document.getElementById('sb-feedback').className = "";
+            document.getElementById('sb-next-btn').classList.add('hidden');
+        }
+
+        function renderSentenceBuilder() {
+            const targetDiv = document.getElementById('sb-target');
+            const poolDiv = document.getElementById('sb-pool');
+            
+            targetDiv.innerHTML = '';
+            poolDiv.innerHTML = '';
+            
+            currentTargetWords.forEach((word, index) => {
+                const chip = document.createElement('div');
+                chip.className = 'word-chip';
+                chip.innerText = word;
+                chip.onclick = () => moveWordToPool(index);
+                targetDiv.appendChild(chip);
+            });
+            
+            currentPoolWords.forEach((word, index) => {
+                const chip = document.createElement('div');
+                chip.className = 'word-chip';
+                chip.innerText = word;
+                chip.onclick = () => moveWordToTarget(index);
+                poolDiv.appendChild(chip);
+            });
+        }
+
+        function moveWordToTarget(poolIndex) {
+            const word = currentPoolWords[poolIndex];
+            currentPoolWords.splice(poolIndex, 1);
+            currentTargetWords.push(word);
+            renderSentenceBuilder();
+        }
+
+        function moveWordToPool(targetIndex) {
+            const word = currentTargetWords[targetIndex];
+            currentTargetWords.splice(targetIndex, 1);
+            currentPoolWords.push(word);
+            renderSentenceBuilder();
+        }
+
+        function resetSentenceTask() {
+            const sentence = currentSentenceList[currentSentenceIndex];
+            const words = sentence.split(' ');
+            currentPoolWords = [...words];
+            shuffleArray(currentPoolWords);
+            currentTargetWords = [];
+            renderSentenceBuilder();
+            document.getElementById('sb-feedback').innerText = "";
+            document.getElementById('sb-feedback').className = "";
+        }
+
+        function checkSentenceOrder() {
+            const userSentence = currentTargetWords.join(' ');
+            const correctSentence = currentSentenceList[currentSentenceIndex];
+            
+            if (userSentence === correctSentence) {
+                document.getElementById('sb-feedback').innerText = "Helyes! 🎉";
+                document.getElementById('sb-feedback').className = "correct";
+                document.getElementById('sb-next-btn').classList.remove('hidden');
+            } else {
+                document.getElementById('sb-feedback').innerText = "Nem jó sorrend. Próbáld újra!";
+                document.getElementById('sb-feedback').className = "wrong";
+            }
+        }
+
+        function nextSentenceTask() {
+            currentSentenceIndex++;
+            if (currentSentenceIndex < currentSentenceList.length) {
+                loadSentenceTask();
+            } else {
+                alert("Gratulálok! Befejezted a mondatépítő feladatokat ezen a szinten.");
+                showMenu();
             }
         }
 

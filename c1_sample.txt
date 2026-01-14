@@ -1,0 +1,13 @@
+Title: Should governments regulate social media platforms?
+
+The ubiquity of social media has transformed how people communicate, consume news and mobilise politically; yet it has also generated harms—misinformation, targeted manipulation and opacity around algorithms. Given the social and economic power wielded by a handful of platforms, there is a compelling argument for government regulation. However, regulation must be carefully designed to protect free expression and innovation while addressing demonstrable harms.
+
+First, regulation is justified because certain market failures and negative externalities are not resolved by market forces alone. Platforms benefit from network effects and economies of scale that entrench market dominance, reducing incentives to moderate content responsibly or to be transparent about ad-targeting practices. Without oversight, users and even democratic institutions can be damaged by unchecked misinformation campaigns and opaque data practices. A legal framework requiring transparency about algorithmic prioritisation and stricter limits on microtargeted political advertising would increase accountability and reduce harms.
+
+Second, regulatory approaches can be calibrated to preserve civil liberties. Blanket censorship is unnecessary and dangerous; instead, governments should focus on measurable outcomes—harmful disinformation that incites violence, coordinated inauthentic behaviour and the sale of illicit goods. Independent oversight bodies and appeals mechanisms could ensure that content-removal policies are applied consistently and fairly, reducing the risk of abuse.
+
+Opponents argue that government intervention risks politicising moderation and stifling innovation. This is a valid concern; overly prescriptive or poorly drafted rules might entrench incumbents or chill new entrants. To mitigate this, regulation should favour transparency, auditability and competition-enhancing measures—such as interoperability requirements—rather than micromanaging content decisions.
+
+In conclusion, governments have both the right and the responsibility to regulate social media where clear harms exist. The optimal strategy balances protection of free speech with enforceable standards for transparency, consumer protection and competition. Carefully targeted, evidence-based regulation can safeguard democratic discourse without extinguishing the creative and economic benefits of social platforms.
+
+Marker’s notes (brief): strong thesis; balanced argument; good use of mitigation strategies; vocabulary precise. Minor improvements: add one concrete example and a reference to a policy precedent (e.g., GDPR-like framework) to strengthen evidence.
