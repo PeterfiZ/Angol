@@ -191,9 +191,11 @@
         
         <div class="reading-controls">
             <button class="btn" onclick="speakReadingText()" style="background-color: #FF9800;">🔊 Felolvasás</button>
+            <button class="btn" id="pronunciation-btn" onclick="togglePronunciation()" style="background-color: #9C27B0;">🎤 Kiejtés</button>
             <button class="btn" id="start-reading-btn" onclick="startReadingTimer()">⏱️ Indítás</button>
             <button class="btn hidden" id="new-text-btn" onclick="loadNewReadingText()">🔄 Új szöveg</button>
         </div>
+        <div id="pronunciation-feedback" style="margin-top: 15px; padding: 10px; border: 1px solid #eee; border-radius: 5px; min-height: 20px; font-size: 0.9em; background-color: #fafafa; display: none;"></div>
         <button class="btn" style="background-color: #777; margin-top: 20px;" onclick="showMenu()">Vissza a menübe</button>
     </div>
 
@@ -720,6 +722,10 @@
         
         let readingTimerInterval;
         let currentReadingLevel = "";
+        
+        let currentEnglishText = "";
+        let recognition;
+        let isListening = false;
 
         let currentSentenceList = [];
         let currentSentenceIndex = 0;
@@ -893,6 +899,7 @@
             document.getElementById('reading-practice').classList.remove('hidden');
             document.getElementById('reading-level-title').innerText = level + " Szint - Olvasás";
             loadNewReadingText();
+            document.getElementById('pronunciation-feedback').style.display = 'none';
         }
 
         function loadNewReadingText() {
@@ -905,6 +912,7 @@
             const randomItem = texts[Math.floor(Math.random() * texts.length)];
             
             const englishText = randomItem.text;
+            currentEnglishText = englishText;
             const hungarianText = randomItem.translation;
 
             const contentDiv = document.getElementById('reading-content');
@@ -958,6 +966,95 @@
                 window.speechSynthesis.cancel();
                 window.speechSynthesis.speak(utterance);
             }
+        }
+
+        function togglePronunciation() {
+            const feedbackDiv = document.getElementById('pronunciation-feedback');
+            const btn = document.getElementById('pronunciation-btn');
+
+            if (isListening) {
+                if (recognition) recognition.stop();
+                isListening = false;
+                btn.innerText = "🎤 Kiejtés";
+                return;
+            }
+
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert("A böngésződ nem támogatja a hangfelismerést (próbáld Chrome-ban asztali gépen vagy Androidon).");
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.continuous = true;
+            recognition.interimResults = true;
+
+            feedbackDiv.style.display = 'block';
+            feedbackDiv.innerHTML = "<i>Figyelek... Olvasd fel a szöveget!</i>";
+            
+            let finalTranscript = '';
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript + ' ';
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+                
+                const currentSpoken = finalTranscript + interimTranscript;
+                const accuracy = calculateAccuracy(currentSpoken, currentEnglishText);
+                
+                feedbackDiv.innerHTML = `
+                    <div style="color: #555; margin-bottom: 5px;">Hallott szöveg:</div>
+                    <div style="font-style: italic; margin-bottom: 10px; color: #333;">${currentSpoken}</div>
+                    <div style="font-weight: bold; color: ${accuracy > 60 ? '#4CAF50' : '#FF9800'}">Becsült egyezés: ${accuracy}%</div>
+                `;
+            };
+
+            recognition.onerror = (event) => {
+                console.log("Speech recognition error", event.error);
+                if (event.error === 'not-allowed') {
+                    alert("Kérlek engedélyezd a mikrofon használatát!");
+                    isListening = false;
+                    btn.innerText = "🎤 Kiejtés";
+                }
+            };
+            
+            recognition.onend = () => {
+                if (isListening) {
+                    isListening = false;
+                    btn.innerText = "🎤 Kiejtés";
+                }
+            };
+
+            recognition.start();
+            isListening = true;
+            btn.innerText = "⏹️ Leállítás";
+        }
+
+        function calculateAccuracy(spoken, original) {
+            const normalize = text => text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").split(/\s+/).filter(w => w.length > 0);
+            const spokenWords = normalize(spoken);
+            const originalWords = normalize(original);
+            
+            if (originalWords.length === 0) return 0;
+
+            let matches = 0;
+            let originalMap = {};
+            originalWords.forEach(w => originalMap[w] = (originalMap[w] || 0) + 1);
+
+            spokenWords.forEach(w => {
+                if (originalMap[w] && originalMap[w] > 0) {
+                    matches++;
+                    originalMap[w]--;
+                }
+            });
+
+            return Math.round((matches / originalWords.length) * 100);
         }
 
         // Mondatépítő funkciók
