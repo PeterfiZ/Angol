@@ -126,6 +126,15 @@
             <label style="font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
                 <input type="checkbox" id="hard-mode" style="width: 18px; height: 18px;"> Nehéz mód (10 mp) 🔥
             </label>
+            <div style="margin-top: 10px;">
+                <label for="session-duration" style="font-size: 16px; color: #444;">Időkorlát:</label>
+                <select id="session-duration" class="btn-option" style="width: auto; padding: 5px; margin-left: 10px; display: inline-block;">
+                    <option value="0" selected>Nincs (Végtelen)</option>
+                    <option value="60">1 perc</option>
+                    <option value="300">5 perc</option>
+                    <option value="600">10 perc</option>
+                </select>
+            </div>
         </div>
         <button class="btn" onclick="startLevel('A1')">A1 - Kezdő</button>
         <button class="btn" onclick="startLevel('A2')">A2 - Alapfok</button>
@@ -176,7 +185,7 @@
     <!-- Kvíz felület -->
     <div class="container hidden" id="quiz">
         <h2 id="level-title">Szint</h2>
-        <p class="progress">Kérdés: <span id="q-num">1</span> | Pontszám: <span id="score-display">0</span> | Idő: <span id="timer">30</span>mp</p>
+        <p class="progress">Kérdés: <span id="q-num">1</span> | Pontszám: <span id="score-display">0</span> | Idő: <span id="timer">30</span>mp <span id="global-timer-wrapper" class="hidden">| Hátralévő: <span id="global-timer">00:00</span></span></p>
         <div style="margin: 30px 0; display: flex; justify-content: center; align-items: center; gap: 10px;">
             <h3 id="question-text" style="margin: 0;">Kérdés helye</h3>
             <button onclick="speakCurrentQuestion()" style="background: none; border: none; cursor: pointer; font-size: 1.5em;" title="Kiejtés">🔊</button>
@@ -221,6 +230,8 @@
         <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
             <button class="btn" onclick="checkSentenceOrder()" style="background-color: #4CAF50; width: auto; flex: 1;">Ellenőrzés</button>
             <button class="btn" onclick="resetSentenceTask()" style="background-color: #FF9800; width: auto; flex: 1;">Újra</button>
+            <button class="btn" onclick="showSentenceSolution()" style="background-color: #2196F3; width: auto; flex: 1;">Megoldás</button>
+            <button class="btn" onclick="speakSentence()" style="background-color: #9C27B0; width: auto; flex: 1;" title="Kiejtés">🔊</button>
         </div>
         
         <button class="btn hidden" id="sb-next-btn" onclick="nextSentenceTask()">Következő</button>
@@ -295,7 +306,9 @@
                 "He plays football on Mondays.", "My father is a doctor.", "They are at home.", "The dog is under the table.",
                 "I want a new bike.", "It is cold today.", "My mother cooks lunch.", "The bird sings a song.",
                 "I see a green car.", "She likes chocolate cake.", "We walk to the park.", "The flower is beautiful.",
-                "He reads a book.", "I have two brothers.", "The water is warm.", "They speak English."
+                "He reads a book.", "I have two brothers.", "The water is warm.", "They speak English.",
+                "The cat sleeps on the bed.", "I like to eat pizza.", "She plays with her doll.", "We go to the park.", "He has a blue car.",
+                "The dog runs fast.", "My sister is tall.", "I drink water.", "They are happy.", "The sun is yellow."
             ],
             'A2': [
                 "I went to the cinema yesterday.", "She is taller than me.", "We are watching TV now.", 
@@ -307,7 +320,9 @@
                 "She bought a beautiful dress yesterday.", "I have never eaten sushi before.", "The weather will be sunny tomorrow.",
                 "He is the fastest runner in the school.", "We are having a party on Saturday.", "She did not like the food.",
                 "I was working all day yesterday.", "Have you seen my keys anywhere?", "They are going to buy a new house.",
-                "He is more intelligent than his brother.", "I will call you later."
+                "He is more intelligent than his brother.", "I will call you later.",
+                "I bought a new shirt yesterday.", "She is going to the market.", "We have lived here for two years.", "He was watching TV when I called.", "They will visit us next week.",
+                "Have you ever seen a ghost?", "I am taller than my brother.", "She does not like coffee.", "We were playing in the garden.", "He has already eaten lunch."
             ],
             'B1': [
                 "I have lived here for ten years.", "If it rains we will stay at home.", "I look forward to seeing you.",
@@ -319,7 +334,9 @@
                 "The house was built in nineteen ninety.", "She asked me where I lived.", "I would have called you if I had known.",
                 "You ought to apologize to her.", "He is interested in learning history.", "The problem has been solved recently.",
                 "I regret not studying harder for the exam.", "She is capable of doing great things.", "We are looking forward to the holiday.",
-                "It is important to eat healthy food.", "I wish I had more time."
+                "It is important to eat healthy food.", "I wish I had more time.",
+                "If I had money I would travel.", "She asked me where I was going.", "I have been working here since twenty ten.", "The book was written by a famous author.", "You should have told me earlier.",
+                "I look forward to hearing from you.", "He managed to finish the project on time.", "Unless you hurry you will miss the bus.", "I used to live in London.", "She is interested in learning Spanish."
             ],
             'B2': [
                 "He is believed to be rich.", "Had I known I would have helped.", "Not only was he late but he also forgot his book.",
@@ -331,7 +348,9 @@
                 "She denied having stolen the jewelry.", "Only by working hard can you succeed.", "The more you practice the better you become.",
                 "He acts as if he were the boss.", "Suppose you won the lottery what would you do?", "It is about time we started the project.",
                 "Rarely do we see such talent.", "She objected to being treated like a child.", "Having finished his work he went home.",
-                "Whatever you do do not give up.", "Should you need any help please let me know."
+                "Whatever you do do not give up.", "Should you need any help please let me know.",
+                "Had I known I would have come.", "It is high time we left.", "She is accused of lying to the police.", "Not only did he win but he also set a record.", "I would rather you stayed home.",
+                "Despite the rain we went for a walk.", "He is believed to be innocent.", "No sooner had I arrived than it started raining.", "It is essential that he be informed.", "She denied having seen the accident."
             ],
             'C1': [
                 "Not only did he win the competition but he also broke the record.", "Had I known about the meeting I would have attended.",
@@ -339,7 +358,9 @@
                 "She is believed to be the best candidate for the job.", "Seldom have I seen such a beautiful painting.",
                 "Under no circumstances should you open this door.", "I would rather you did not smoke in here.",
                 "By the time you arrive I will have finished the work.", "He was so tired that he fell asleep immediately.",
-                "Only when I arrived home did I realize I had lost my keys.", "It is essential that everyone be informed about the changes."
+                "Only when I arrived home did I realize I had lost my keys.", "It is essential that everyone be informed about the changes.",
+                "Seldom have I seen such a mess.", "Under no circumstances should you touch this.", "Had it not been for your help I would have failed.", "Little did she know what was coming.", "Whatever happens I will stand by you.",
+                "Be that as it may I still disagree.", "Only after checking did I realize my mistake.", "Were you to ask me I would say yes.", "Scarcely had we started when the lights went out.", "Should you need assistance please call me."
             ],
             'C2': [
                 "Scarcely had the ceremony begun when the rain started falling.", "It is imperative that the committee reach a consensus immediately.",
@@ -347,7 +368,9 @@
                 "Were it not for your assistance I would not have succeeded.", "Such was the force of the storm that trees were uprooted.",
                 "No sooner had I sat down than the phone rang.", "Whatever happens I will always support you.",
                 "Should you require any further information please do not hesitate to contact me.", "Had it not been for the quick reaction of the driver the accident would have been fatal.",
-                "Not for a moment did I imagine that we would win the lottery.", "Strange as it may seem I actually enjoy working on weekends."
+                "Not for a moment did I imagine that we would win the lottery.", "Strange as it may seem I actually enjoy working on weekends.",
+                "Such was the noise that we could not hear.", "Were it not for his quick thinking we would be dead.", "Hardly had I entered the room when the phone rang.", "Not for a moment did I doubt his integrity.", "Strange as it may seem I actually like it.",
+                "Should you require further information do not hesitate to ask.", "Whatever the consequences I must speak the truth.", "Had I but known the truth I would have acted differently.", "Little did they realize the danger they were in.", "So great was his anger that he could not speak."
             ]
         };
 
@@ -359,6 +382,8 @@
         let currentLevel = "";
         let wrongAnswers = [];
         let isRetry = false;
+        let globalTimerInterval;
+        let questionsAttempted = 0;
         
         let readingTimerInterval;
         let currentReadingLevel = "";
@@ -381,6 +406,7 @@
 
         function startLevel(level) {
             const isHardMode = document.getElementById('hard-mode').checked;
+            const sessionDuration = parseInt(document.getElementById('session-duration').value);
             timeLimit = isHardMode ? 10 : 30;
             currentLevel = level;
 
@@ -388,12 +414,42 @@
             shuffleArray(currentQuestions);
             currentIndex = 0;
             score = 0;
+            questionsAttempted = 0;
             wrongAnswers = [];
             isRetry = false;
+            
+            if (sessionDuration > 0) {
+                document.getElementById('global-timer-wrapper').classList.remove('hidden');
+                startGlobalTimer(sessionDuration);
+            } else {
+                document.getElementById('global-timer-wrapper').classList.add('hidden');
+            }
+
             document.getElementById('menu').classList.add('hidden');
             document.getElementById('quiz').classList.remove('hidden');
             document.getElementById('level-title').innerText = level + " Szint";
             loadQuestion();
+        }
+
+        function startGlobalTimer(duration) {
+            clearInterval(globalTimerInterval);
+            let timeLeft = duration;
+            updateGlobalTimerDisplay(timeLeft);
+            
+            globalTimerInterval = setInterval(() => {
+                timeLeft--;
+                updateGlobalTimerDisplay(timeLeft);
+                if (timeLeft <= 0) {
+                    clearInterval(globalTimerInterval);
+                    finishSession(true);
+                }
+            }, 1000);
+        }
+
+        function updateGlobalTimerDisplay(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            document.getElementById('global-timer').innerText = `${m}:${s}`;
         }
 
         function loadQuestion() {
@@ -438,6 +494,7 @@
             document.getElementById('feedback').innerText = "Lejárt az idő! ⏰ A helyes: " + currentQuestions[currentIndex].options[currentQuestions[currentIndex].a];
             document.getElementById('feedback').className = "wrong";
             document.getElementById('next-btn').classList.remove('hidden');
+            questionsAttempted++;
             wrongAnswers.push(currentQuestions[currentIndex]);
         }
 
@@ -455,6 +512,7 @@
             clearInterval(timerInterval);
             const buttons = document.querySelectorAll('.btn-option');
             buttons.forEach(b => b.disabled = true); // Gombok letiltása
+            questionsAttempted++;
 
             if (selected === correct) {
                 score++;
@@ -478,38 +536,52 @@
             if (currentIndex < currentQuestions.length) {
                 loadQuestion();
             } else {
-                if (!isRetry) {
-                    saveResult(currentLevel, score, currentQuestions.length);
-                }
-                const percentage = Math.round((score / currentQuestions.length) * 100);
-                let msg = `Eredmény: ${score} / ${currentQuestions.length} (${percentage}%)\n`;
-                
-                if (percentage === 100) msg += "Tökéletes! 🏆";
-                else if (percentage >= 80) msg += "Kiváló! 🌟";
-                else if (percentage >= 50) msg += "Jó munka! 👍";
-                else msg += "Gyakorolj még! 💪";
-
-                if (wrongAnswers.length > 0) {
-                    msg += "\n\nSzeretnéd újra megpróbálni azokat a kérdéseket, amiket elrontottál?";
-                    if (confirm(msg)) {
-                        isRetry = true;
-                        currentQuestions = [...wrongAnswers];
-                        wrongAnswers = [];
-                        currentIndex = 0;
-                        score = 0;
-                        document.getElementById('level-title').innerText = currentLevel + " Szint (Hibajavítás)";
-                        loadQuestion();
-                        return;
-                    }
-                } else {
-                    alert(msg);
-                }
-                showMenu();
+                finishSession(false);
             }
+        }
+
+        function finishSession(timeRanOut) {
+            clearInterval(timerInterval);
+            clearInterval(globalTimerInterval);
+            
+            if (!isRetry) {
+                saveResult(currentLevel, score, questionsAttempted);
+            }
+            
+            const percentage = questionsAttempted > 0 ? Math.round((score / questionsAttempted) * 100) : 0;
+            let msg = timeRanOut ? "Lejárt az idő! ⏰\n\n" : "Gyakorlás vége! 🎉\n\n";
+            
+            msg += `Megoldott feladatok: ${questionsAttempted}\n`;
+            msg += `Helyes válaszok: ${score}\n`;
+            msg += `Eredmény: ${percentage}%\n`;
+            
+            if (percentage === 100 && questionsAttempted > 0) msg += "Tökéletes! 🏆";
+            else if (percentage >= 80) msg += "Kiváló! 🌟";
+            else if (percentage >= 50) msg += "Jó munka! 👍";
+            else if (questionsAttempted > 0) msg += "Gyakorolj még! 💪";
+
+            if (wrongAnswers.length > 0 && !timeRanOut) {
+                msg += "\n\nSzeretnéd újra megpróbálni azokat a kérdéseket, amiket elrontottál?";
+                if (confirm(msg)) {
+                    isRetry = true;
+                    currentQuestions = [...wrongAnswers];
+                    wrongAnswers = [];
+                    currentIndex = 0;
+                    score = 0;
+                    questionsAttempted = 0;
+                    document.getElementById('level-title').innerText = currentLevel + " Szint (Hibajavítás)";
+                    loadQuestion();
+                    return;
+                }
+            } else {
+                alert(msg);
+            }
+            showMenu();
         }
 
         function showMenu() {
             clearInterval(timerInterval);
+            clearInterval(globalTimerInterval);
             if ('speechSynthesis' in window) window.speechSynthesis.cancel();
             document.getElementById('quiz').classList.add('hidden');
             document.getElementById('menu').classList.remove('hidden');
@@ -785,6 +857,23 @@
             } else {
                 document.getElementById('sb-feedback').innerText = "Nem jó sorrend. Próbáld újra!";
                 document.getElementById('sb-feedback').className = "wrong";
+            }
+        }
+
+        function showSentenceSolution() {
+            const correctSentence = currentSentenceList[currentSentenceIndex];
+            const feedbackEl = document.getElementById('sb-feedback');
+            feedbackEl.innerText = `A helyes sorrend: ${correctSentence}`;
+            feedbackEl.className = ""; // Stílusok visszaállítása
+        }
+
+        function speakSentence() {
+            if ('speechSynthesis' in window) {
+                const text = currentSentenceList[currentSentenceIndex];
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(utterance);
             }
         }
 
