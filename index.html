@@ -8,50 +8,83 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#4CAF50">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #4CAF50;
+            --primary-hover: #43a047;
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --shadow: 0 10px 30px rgba(0,0,0,0.1);
+            --radius: 16px;
+        }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-gradient);
             display: flex;
             justify-content: center;
-            /* align-items: center; - Eltávolítva, hogy ne vágja le a tetejét */
             min-height: 100vh;
             margin: 0;
             padding: 20px 0; /* Hely hagyása a széleken */
             box-sizing: border-box;
+            color: var(--text-color);
         }
         .container {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            max-width: 500px;
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            max-width: 600px;
             width: 90%;
             text-align: center;
             margin: auto; /* Biztonságos középre igazítás */
+            transition: transform 0.3s ease;
         }
-        h1, h2 { color: #333; }
+        h1 { font-weight: 600; color: var(--primary-color); margin-bottom: 1.5rem; }
+        h2 { font-weight: 500; color: #444; margin-bottom: 1rem; }
+        h3 { font-weight: 500; color: #555; margin-top: 2rem; }
+        
         .btn {
-            background-color: #4CAF50;
+            background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 14px 24px;
             margin: 8px;
-            border-radius: 6px;
+            border-radius: 12px;
             cursor: pointer;
             font-size: 16px;
-            transition: background 0.3s;
+            font-weight: 500;
+            transition: all 0.2s ease;
             width: 100%;
             max-width: 300px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        .btn:hover { background-color: #45a049; }
+        .btn:hover { 
+            background-color: var(--primary-hover); 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        .btn:active { transform: translateY(0); }
+        
         .btn-option {
             background-color: white;
             color: #333;
-            border: 2px solid #4CAF50;
+            border: 2px solid #e0e0e0;
+            box-shadow: none;
         }
-        .btn-option:hover { background-color: #e8f5e9; }
+        .btn-option:hover { 
+            background-color: #f0fcf1; 
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
         .hidden { display: none; }
+        
+        /* Animációk */
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         #feedback { margin-top: 15px; font-weight: bold; min-height: 24px; }
         .correct { color: green; }
         .wrong { color: red; }
@@ -62,22 +95,22 @@
             text-align: left;
             margin: 20px 0;
             padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border-left: 5px solid #4CAF50;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+            background: #f1f8e9;
+            border-radius: 12px;
+            border-left: 5px solid var(--primary-color);
+            color: #333;
         }
         .timer-bar-container { width: 100%; background-color: #e0e0e0; border-radius: 5px; height: 12px; margin-top: 15px; overflow: hidden; }
-        .timer-bar { height: 100%; background-color: #4CAF50; width: 0%; transition: width 0.1s linear; }
+        .timer-bar { height: 100%; background-color: var(--primary-color); width: 0%; transition: width 0.1s linear; }
         .reading-controls { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
         .vocab-table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: left; font-size: 0.9em; }
         .vocab-table th, .vocab-table td { padding: 8px; border-bottom: 1px solid #eee; }
-        .vocab-table th { background-color: #f8f9fa; color: #444; }
-        .vocab-level-header { background-color: #4CAF50; color: white; padding: 8px 12px; margin-top: 20px; border-radius: 4px; font-weight: bold; text-align: left; }
+        .vocab-table th { background-color: #f9f9f9; color: #444; font-weight: 600; }
+        .vocab-level-header { background-color: var(--primary-color); color: white; padding: 10px 15px; margin-top: 20px; border-radius: 8px; font-weight: 600; text-align: left; }
         .sentence-area {
             min-height: 60px;
-            border: 2px dashed #ccc;
-            border-radius: 8px;
+            border: 2px dashed #bdbdbd;
+            border-radius: 12px;
             padding: 15px;
             margin: 20px 0;
             display: flex;
@@ -98,37 +131,51 @@
         .word-chip {
             background-color: #e3f2fd;
             color: #1565c0;
-            border: 1px solid #bbdefb;
+            border: none;
             border-radius: 20px;
-            padding: 8px 16px;
+            padding: 10px 18px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 15px;
+            font-weight: 500;
             user-select: none;
             transition: transform 0.1s, background-color 0.2s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .word-chip:hover {
-            background-color: #bbdefb;
+            background-color: #bbdefb; 
             transform: translateY(-2px);
         }
         .word-chip:active {
             transform: translateY(0);
+        }
+        
+        /* Grid a gomboknak */
+        .grid-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .grid-buttons .btn {
+            width: 100%;
+            margin: 0;
+            max-width: none;
         }
     </style>
 </head>
 <body>
 
     <!-- Főmenü -->
-    <div class="container" id="menu">
+    <div class="container fade-in" id="menu">
         <h1>Angol Nyelvtanuló Program</h1>
         <p>Válassz szintet a kezdéshez:</p>
         <div style="margin-bottom: 15px;">
             <label style="font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <input type="checkbox" id="hard-mode" style="width: 18px; height: 18px;"> Nehéz mód (10 mp) 🔥
+                <input type="checkbox" id="hard-mode" style="width: 18px; height: 18px; accent-color: var(--primary-color);"> Nehéz mód (10 mp) 🔥
             </label>
             <div style="margin-top: 10px;">
                 <label for="session-duration" style="font-size: 16px; color: #444;">Időkorlát:</label>
-                <select id="session-duration" class="btn-option" style="width: auto; padding: 5px; margin-left: 10px; display: inline-block;">
+                <select id="session-duration" class="btn-option" style="width: auto; padding: 8px; margin-left: 10px; display: inline-block; border-radius: 8px;">
                     <option value="0" selected>Nincs (Végtelen)</option>
                     <option value="60">1 perc</option>
                     <option value="300">5 perc</option>
@@ -136,35 +183,38 @@
                 </select>
             </div>
         </div>
-        <button class="btn" onclick="startLevel('A1')">A1 - Kezdő</button>
-        <button class="btn" onclick="startLevel('A2')">A2 - Alapfok</button>
-        <button class="btn" onclick="startLevel('B1')">B1 - Középfok (Eleje)</button>
-    <button class="btn" onclick="startLevel('B2')">B2 - Középfok (Vége)</button>
-    <button class="btn" onclick="startLevel('C1')">C1 - Felsőfok (Eleje)</button>
-    <button class="btn" onclick="startLevel('C2')">C2 - Felsőfok (Vége)</button>
-
-        <h3 style="margin-top: 25px; color: #444;">📖 1 Perces Olvasási Gyakorlat</h3>
-        <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-            <button class="btn" style="width: auto; min-width: 60px;" onclick="startReading('A1')">A1</button>
-            <button class="btn" style="width: auto; min-width: 60px;" onclick="startReading('A2')">A2</button>
-            <button class="btn" style="width: auto; min-width: 60px;" onclick="startReading('B1')">B1</button>
-            <button class="btn" style="width: auto; min-width: 60px;" onclick="startReading('B2')">B2</button>
-            <button class="btn" style="width: auto; min-width: 60px;" onclick="startReading('C1')">C1</button>
-            <button class="btn" style="width: auto; min-width: 60px;" onclick="startReading('C2')">C2</button>
+        
+        <div class="grid-buttons">
+            <button class="btn" onclick="startLevel('A1')">A1 - Kezdő</button>
+            <button class="btn" onclick="startLevel('A2')">A2 - Alapfok</button>
+            <button class="btn" onclick="startLevel('B1')">B1 - Közép 1</button>
+            <button class="btn" onclick="startLevel('B2')">B2 - Közép 2</button>
+            <button class="btn" onclick="startLevel('C1')">C1 - Felső 1</button>
+            <button class="btn" onclick="startLevel('C2')">C2 - Felső 2</button>
         </div>
 
-        <h3 style="margin-top: 25px; color: #444;">🧩 Mondatépítő</h3>
-        <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-            <button class="btn" style="width: auto; min-width: 60px;" onclick="startSentenceBuilder('A1')">A1</button>
-            <button class="btn" style="width: auto; min-width: 60px;" onclick="startSentenceBuilder('A2')">A2</button>
-            <button class="btn" style="width: auto; min-width: 60px;" onclick="startSentenceBuilder('B1')">B1</button>
-            <button class="btn" style="width: auto; min-width: 60px;" onclick="startSentenceBuilder('B2')">B2</button>
-            <button class="btn" style="width: auto; min-width: 60px;" onclick="startSentenceBuilder('C1')">C1</button>
-            <button class="btn" style="width: auto; min-width: 60px;" onclick="startSentenceBuilder('C2')">C2</button>
+        <h3>📖 1 Perces Olvasás</h3>
+        <div class="grid-buttons">
+            <button class="btn" onclick="startReading('A1')">A1</button>
+            <button class="btn" onclick="startReading('A2')">A2</button>
+            <button class="btn" onclick="startReading('B1')">B1</button>
+            <button class="btn" onclick="startReading('B2')">B2</button>
+            <button class="btn" onclick="startReading('C1')">C1</button>
+            <button class="btn" onclick="startReading('C2')">C2</button>
+        </div>
+
+        <h3>🧩 Mondatépítő</h3>
+        <div class="grid-buttons">
+            <button class="btn" onclick="startSentenceBuilder('A1')">A1</button>
+            <button class="btn" onclick="startSentenceBuilder('A2')">A2</button>
+            <button class="btn" onclick="startSentenceBuilder('B1')">B1</button>
+            <button class="btn" onclick="startSentenceBuilder('B2')">B2</button>
+            <button class="btn" onclick="startSentenceBuilder('C1')">C1</button>
+            <button class="btn" onclick="startSentenceBuilder('C2')">C2</button>
         </div>
 
         <div style="margin-top: 20px;">
-            <button class="btn" style="background-color: #008CBA;" onclick="showVocabulary()">📚 Szókincs Tár</button>
+            <button class="btn" style="background-color: #0288d1;" onclick="showVocabulary()">📚 Szókincs Tár</button>
             <button class="btn" id="installBtn" style="display:none; background-color: #FF5722;">📲 App Telepítése</button>
         </div>
 
@@ -387,6 +437,7 @@
         
         let readingTimerInterval;
         let currentReadingLevel = "";
+        let availableReadingIndices = [];
         
         let currentEnglishText = "";
         let recognition;
@@ -396,6 +447,8 @@
         let currentSentenceIndex = 0;
         let currentTargetWords = [];
         let currentPoolWords = [];
+        let availableSentenceIndices = [];
+        let currentCorrectSentence = "";
 
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -410,7 +463,13 @@
             timeLimit = isHardMode ? 10 : 30;
             currentLevel = level;
 
-            currentQuestions = [...database[level]];
+            // Biztonságos adatbetöltés, ha esetleg hiányozna egy szint
+            currentQuestions = database[level] ? [...database[level]] : [];
+            if (currentQuestions.length === 0) {
+                alert("Ez a szint még nem elérhető vagy hiba történt a betöltéskor.");
+                return;
+            }
+            
             shuffleArray(currentQuestions);
             currentIndex = 0;
             score = 0;
@@ -425,8 +484,7 @@
                 document.getElementById('global-timer-wrapper').classList.add('hidden');
             }
 
-            document.getElementById('menu').classList.add('hidden');
-            document.getElementById('quiz').classList.remove('hidden');
+            showScreen('quiz');
             document.getElementById('level-title').innerText = level + " Szint";
             loadQuestion();
         }
@@ -464,7 +522,12 @@
             const container = document.getElementById('options-container');
             container.innerHTML = '';
             
-            data.options.forEach((opt, idx) => {
+            // Válaszlehetőségek indexeinek keverése, hogy a gombok sorrendje is véletlenszerű legyen
+            const indices = data.options.map((_, i) => i);
+            shuffleArray(indices);
+
+            indices.forEach(idx => {
+                const opt = data.options[idx];
                 const btn = document.createElement('button');
                 btn.className = 'btn btn-option';
                 btn.innerText = opt;
@@ -580,15 +643,8 @@
         }
 
         function showMenu() {
-            clearInterval(timerInterval);
-            clearInterval(globalTimerInterval);
-            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-            document.getElementById('quiz').classList.add('hidden');
-            document.getElementById('menu').classList.remove('hidden');
-            document.getElementById('reading-practice').classList.add('hidden');
-            document.getElementById('vocabulary-view').classList.add('hidden');
-            document.getElementById('sentence-builder').classList.add('hidden');
-            clearInterval(readingTimerInterval);
+            showScreen('menu');
+            clearInterval(globalTimerInterval); // Ezt külön is le kell állítani, mert a showScreen nem kezeli a globális időzítőt
         }
 
         // Show custom task sections (C1 / C2)
@@ -607,8 +663,8 @@
         // Olvasás funkciók
         function startReading(level) {
             currentReadingLevel = level;
-            document.getElementById('menu').classList.add('hidden');
-            document.getElementById('reading-practice').classList.remove('hidden');
+            availableReadingIndices = []; // Lista alaphelyzetbe állítása új szint indításakor
+            showScreen('reading-practice');
             document.getElementById('reading-level-title').innerText = level + " Szint - Olvasás";
             loadNewReadingText();
             document.getElementById('pronunciation-feedback').style.display = 'none';
@@ -621,7 +677,18 @@
             document.getElementById('new-text-btn').classList.add('hidden');
             
             const texts = readingDatabase[currentReadingLevel];
-            const randomItem = texts[Math.floor(Math.random() * texts.length)];
+            
+            // Ha elfogytak a szövegek (vagy most kezdjük), töltsük fel a listát az indexekkel
+            if (availableReadingIndices.length === 0) {
+                availableReadingIndices = texts.map((_, i) => i);
+            }
+
+            // Véletlenszerű választás a még nem használt indexek közül, majd eltávolítás
+            const randIdx = Math.floor(Math.random() * availableReadingIndices.length);
+            const textIndex = availableReadingIndices[randIdx];
+            availableReadingIndices.splice(randIdx, 1);
+            
+            const randomItem = texts[textIndex];
             
             const englishText = randomItem.text;
             currentEnglishText = englishText;
@@ -772,19 +839,29 @@
         // Mondatépítő funkciók
         function startSentenceBuilder(level) {
             currentLevel = level;
-            currentSentenceList = [...sentenceDatabase[level]];
-            shuffleArray(currentSentenceList);
-            currentSentenceIndex = 0;
+            availableSentenceIndices = []; // Lista alaphelyzetbe állítása
             
-            document.getElementById('menu').classList.add('hidden');
-            document.getElementById('sentence-builder').classList.remove('hidden');
+            showScreen('sentence-builder');
             document.getElementById('sb-level-title').innerText = level + " Szint - Mondatépítő";
             
             loadSentenceTask();
         }
 
         function loadSentenceTask() {
-            const sentence = currentSentenceList[currentSentenceIndex];
+            const sentences = sentenceDatabase[currentLevel];
+            
+            // Ha elfogytak a mondatok, töltsük fel a listát
+            if (availableSentenceIndices.length === 0) {
+                availableSentenceIndices = sentences.map((_, i) => i);
+            }
+
+            const randIdx = Math.floor(Math.random() * availableSentenceIndices.length);
+            const sentenceIndex = availableSentenceIndices[randIdx];
+            availableSentenceIndices.splice(randIdx, 1);
+            
+            const sentence = sentences[sentenceIndex];
+            currentCorrectSentence = sentence;
+            
             const words = sentence.split(' ');
             
             currentPoolWords = [...words];
@@ -836,7 +913,7 @@
         }
 
         function resetSentenceTask() {
-            const sentence = currentSentenceList[currentSentenceIndex];
+            const sentence = currentCorrectSentence;
             const words = sentence.split(' ');
             currentPoolWords = [...words];
             shuffleArray(currentPoolWords);
@@ -848,7 +925,7 @@
 
         function checkSentenceOrder() {
             const userSentence = currentTargetWords.join(' ');
-            const correctSentence = currentSentenceList[currentSentenceIndex];
+            const correctSentence = currentCorrectSentence;
             
             if (userSentence === correctSentence) {
                 document.getElementById('sb-feedback').innerText = "Helyes! 🎉";
@@ -861,7 +938,7 @@
         }
 
         function showSentenceSolution() {
-            const correctSentence = currentSentenceList[currentSentenceIndex];
+            const correctSentence = currentCorrectSentence;
             const feedbackEl = document.getElementById('sb-feedback');
             feedbackEl.innerText = `A helyes sorrend: ${correctSentence}`;
             feedbackEl.className = ""; // Stílusok visszaállítása
@@ -869,7 +946,7 @@
 
         function speakSentence() {
             if ('speechSynthesis' in window) {
-                const text = currentSentenceList[currentSentenceIndex];
+                const text = currentCorrectSentence;
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'en-US';
                 window.speechSynthesis.cancel();
@@ -878,18 +955,14 @@
         }
 
         function nextSentenceTask() {
-            currentSentenceIndex++;
-            if (currentSentenceIndex < currentSentenceList.length) {
-                loadSentenceTask();
-            } else {
-                alert("Gratulálok! Befejezted a mondatépítő feladatokat ezen a szinten.");
-                showMenu();
+            if (availableSentenceIndices.length === 0) {
+                alert("Gratulálok! Befejezted a mondatépítő feladatokat ezen a szinten. A feladatok újraindulnak.");
             }
+            loadSentenceTask();
         }
 
         function showVocabulary() {
-            document.getElementById('menu').classList.add('hidden');
-            document.getElementById('vocabulary-view').classList.remove('hidden');
+            showScreen('vocabulary-view');
             
             const container = document.getElementById('vocab-content');
             container.innerHTML = '';
@@ -913,6 +986,23 @@
                 });
                 container.appendChild(table);
             }
+        }
+
+        // Képernyőváltó segédfüggvény
+        function showScreen(screenId) {
+            const screens = ['menu', 'quiz', 'reading-practice', 'sentence-builder', 'vocabulary-view'];
+            screens.forEach(id => document.getElementById(id).classList.add('hidden'));
+            
+            const target = document.getElementById(screenId);
+            if (target) {
+                target.classList.remove('hidden');
+                target.classList.add('fade-in');
+            }
+            
+            // Háttérfolyamatok leállítása
+            clearInterval(timerInterval);
+            clearInterval(readingTimerInterval);
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
         }
 
         function saveResult(level, score, total) {
