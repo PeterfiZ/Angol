@@ -161,6 +161,33 @@
             margin: 0;
             max-width: none;
         }
+
+        /* Szókártya stílusok */
+        .flashcard-container { perspective: 1000px; width: 100%; max-width: 400px; height: 250px; margin: 20px auto; cursor: pointer; }
+        .flashcard { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 15px; }
+        .flashcard.flipped { transform: rotateY(180deg); }
+        .flashcard-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 15px; padding: 20px; box-sizing: border-box; font-size: 1.5em; text-align: center; }
+        .flashcard-front { background-color: #fff; color: #333; border: 2px solid var(--primary-color); }
+        .flashcard-back { background-color: var(--primary-color); color: white; transform: rotateY(180deg); }
+        .flashcard-controls { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+        .fc-hint { font-size: 0.7em; color: #666; margin-top: 10px; font-weight: normal; }
+        
+        /* Mondatépítő progress bar */
+        .sb-progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            height: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .sb-progress-bar {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
     </style>
 </head>
 <body>
@@ -201,6 +228,15 @@
             <button class="btn" onclick="startReading('B2')">B2</button>
             <button class="btn" onclick="startReading('C1')">C1</button>
             <button class="btn" onclick="startReading('C2')">C2</button>
+        </div>
+
+        <h3>🃏 Szókártyák (HU ➡️ EN)</h3>
+        <div class="grid-buttons">
+            <button class="btn" onclick="startFlashcards('A1')">A1</button>
+            <button class="btn" onclick="startFlashcards('A2')">A2</button>
+            <button class="btn" onclick="startFlashcards('B1')">B1</button>
+            <button class="btn" onclick="startFlashcards('B2')">B2</button>
+            <button class="btn" style="background-color: #FF9800;" onclick="startPracticeFlashcards()">Gyakorlandó 📝 <span id="practice-count" style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 10px; font-size: 0.8em;">0</span></button>
         </div>
 
         <h3>🧩 Mondatépítő</h3>
@@ -272,6 +308,10 @@
         <h2 id="sb-level-title">Mondatépítő</h2>
         <p style="color: #666; font-size: 0.9em;">Kattints a szavakra a helyes sorrend összeállításához!</p>
         
+        <div class="sb-progress-container">
+            <div id="sb-progress-bar" class="sb-progress-bar"></div>
+        </div>
+
         <div id="sb-target" class="sentence-area"></div>
         <div id="sb-pool" class="word-pool"></div>
         
@@ -285,6 +325,32 @@
         </div>
         
         <button class="btn hidden" id="sb-next-btn" onclick="nextSentenceTask()">Következő</button>
+        <button class="btn" style="background-color: #777; margin-top: 20px;" onclick="showMenu()">Vissza a menübe</button>
+    </div>
+
+    <!-- Szókártya felület -->
+    <div class="container hidden" id="flashcards-view">
+        <h2 id="fc-level-title">Szókártyák</h2>
+        <p class="progress">Kártya: <span id="fc-num">1</span> / <span id="fc-total">0</span></p>
+        
+        <div class="flashcard-container" onclick="flipCard()">
+            <div class="flashcard" id="current-flashcard">
+                <div class="flashcard-face flashcard-front">
+                    <p id="fc-front-text" style="font-size: 1.2em; font-weight: 500;">Magyar szó</p>
+                    <p class="fc-hint">(Kattints a fordításhoz)</p>
+                </div>
+                <div class="flashcard-face flashcard-back">
+                    <p id="fc-back-text" style="font-size: 1.2em; font-weight: 600;">English Word</p>
+                    <button onclick="speakFlashcard(event)" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; margin-top: 10px;" title="Kiejtés">🔊</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="flashcard-controls hidden" id="fc-controls">
+            <button class="btn" style="background-color: #f44336; width: auto;" onclick="nextFlashcard(false)">Nem tudtam 😕</button>
+            <button class="btn" style="background-color: #4CAF50; width: auto;" onclick="nextFlashcard(true)">Tudtam! 😃</button>
+        </div>
+        
         <button class="btn" style="background-color: #777; margin-top: 20px;" onclick="showMenu()">Vissza a menübe</button>
     </div>
 
@@ -449,6 +515,13 @@
         let currentPoolWords = [];
         let availableSentenceIndices = [];
         let currentCorrectSentence = "";
+
+        // Szókártya változók
+        let currentFlashcards = [];
+        let fcIndex = 0;
+        let fcScore = 0;
+        let fcWrong = [];
+        let isFcRetry = false;
 
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -896,6 +969,30 @@
                 chip.onclick = () => moveWordToTarget(index);
                 poolDiv.appendChild(chip);
             });
+
+            // Progress bar frissítése
+            const correctWords = currentCorrectSentence.split(' ');
+            let matchCount = 0;
+            
+            // Megszámoljuk, hány szó van a helyes abszolút pozícióban
+            currentTargetWords.forEach((word, i) => {
+                if (i < correctWords.length && word === correctWords[i]) {
+                    matchCount++;
+                }
+            });
+
+            const totalWords = correctWords.length;
+            const percentage = totalWords > 0 ? Math.round((matchCount / totalWords) * 100) : 0;
+            const bar = document.getElementById('sb-progress-bar');
+            if (bar) {
+                bar.style.width = percentage + '%';
+                // Színváltás: Narancs, amíg épül, Zöld, ha kész és tökéletes
+                if (percentage === 100 && currentTargetWords.length === totalWords) {
+                    bar.style.backgroundColor = '#4CAF50';
+                } else {
+                    bar.style.backgroundColor = '#FF9800';
+                }
+            }
         }
 
         function moveWordToTarget(poolIndex) {
@@ -961,6 +1058,168 @@
             loadSentenceTask();
         }
 
+        // --- Szókártya Funkciók ---
+
+        // Tartalék adatbázis, ha a JS fájlokból nem sikerülne kinyerni eleget
+        const fallbackVocab = {
+            'A1': [
+                {hu: "Alma", en: "Apple"}, {hu: "Kutya", en: "Dog"}, {hu: "Macska", en: "Cat"}, 
+                {hu: "Ház", en: "House"}, {hu: "Autó", en: "Car"}, {hu: "Iskola", en: "School"},
+                {hu: "Könyv", en: "Book"}, {hu: "Víz", en: "Water"}, {hu: "Kenyér", en: "Bread"},
+                {hu: "Család", en: "Family"}, {hu: "Barát", en: "Friend"}, {hu: "Nap (égitest)", en: "Sun"}
+            ],
+            'A2': [
+                {hu: "Nyaralás", en: "Holiday"}, {hu: "Időjárás", en: "Weather"}, {hu: "Utazás", en: "Journey"},
+                {hu: "Repülőtér", en: "Airport"}, {hu: "Jegy", en: "Ticket"}, {hu: "Pénztárca", en: "Wallet"},
+                {hu: "Veszélyes", en: "Dangerous"}, {hu: "Drága", en: "Expensive"}, {hu: "Olcsó", en: "Cheap"},
+                {hu: "Egészséges", en: "Healthy"}, {hu: "Beteg", en: "Sick"}, {hu: "Gyógyszer", en: "Medicine"}
+            ]
+        };
+
+        function startFlashcards(level) {
+            currentLevel = level;
+            
+            // 1. Próbáljuk kinyerni a szavakat a meglévő adatbázisból
+            let extracted = [];
+            if (database[level]) {
+                extracted = database[level].filter(item => {
+                    // Szűrjük a rövid, nem kérdőjeles, nem hiányos mondatokat
+                    return !item.q.includes('___') && 
+                           !item.q.includes('?') && 
+                           !item.q.includes('->') &&
+                           item.q.split(' ').length < 4;
+                }).map(item => ({
+                    en: item.q,
+                    hu: item.options[item.a] // A helyes válasz a magyar megfelelő
+                }));
+            }
+
+            // 2. Ha kevés adat van, keverjük hozzá a tartalékot (vagy használjuk csak azt)
+            if (fallbackVocab[level]) {
+                extracted = [...extracted, ...fallbackVocab[level]];
+            }
+
+            // Duplikációk szűrése (angol szó alapján)
+            const uniqueMap = new Map();
+            extracted.forEach(item => uniqueMap.set(item.en.toLowerCase(), item));
+            currentFlashcards = Array.from(uniqueMap.values());
+
+            if (currentFlashcards.length === 0) {
+                alert("Ehhez a szinthez jelenleg nincsenek elérhető szókártyák.");
+                return;
+            }
+
+            shuffleArray(currentFlashcards);
+            fcIndex = 0;
+            fcScore = 0;
+            fcWrong = [];
+            isFcRetry = false;
+
+            showScreen('flashcards-view');
+            document.getElementById('fc-level-title').innerText = level + " Szókártyák";
+            renderFlashcard();
+        }
+
+        function renderFlashcard() {
+            const card = currentFlashcards[fcIndex];
+            document.getElementById('fc-num').innerText = fcIndex + 1;
+            document.getElementById('fc-total').innerText = currentFlashcards.length;
+            
+            document.getElementById('fc-front-text').innerText = card.hu;
+            document.getElementById('fc-back-text').innerText = card.en;
+            
+            // Kártya alaphelyzetbe állítása
+            const cardEl = document.getElementById('current-flashcard');
+            cardEl.classList.remove('flipped');
+            document.getElementById('fc-controls').classList.add('hidden');
+        }
+
+        function flipCard() {
+            const cardEl = document.getElementById('current-flashcard');
+            if (!cardEl.classList.contains('flipped')) {
+                cardEl.classList.add('flipped');
+                document.getElementById('fc-controls').classList.remove('hidden');
+            }
+        }
+
+        function updatePracticeList(card, add) {
+            const key = 'angol_tanulo_practice_words';
+            let list = JSON.parse(localStorage.getItem(key)) || [];
+            
+            if (add) {
+                if (!list.some(c => c.en === card.en)) {
+                    list.push(card);
+                }
+            } else {
+                list = list.filter(c => c.en !== card.en);
+            }
+            
+            localStorage.setItem(key, JSON.stringify(list));
+            updatePracticeCountUI();
+        }
+
+        function updatePracticeCountUI() {
+            const key = 'angol_tanulo_practice_words';
+            const list = JSON.parse(localStorage.getItem(key)) || [];
+            const countSpan = document.getElementById('practice-count');
+            if (countSpan) {
+                countSpan.innerText = list.length;
+            }
+        }
+
+        function startPracticeFlashcards() {
+            const key = 'angol_tanulo_practice_words';
+            let list = JSON.parse(localStorage.getItem(key)) || [];
+            
+            if (list.length === 0) {
+                alert("Nincs mentett gyakorlandó szó. Ha elrontasz egy kártyát, az idekerül.");
+                return;
+            }
+            
+            currentLevel = "Gyakorlandó";
+            currentFlashcards = list;
+            shuffleArray(currentFlashcards);
+            
+            fcIndex = 0;
+            fcScore = 0;
+            fcWrong = [];
+            isFcRetry = false;
+
+            showScreen('flashcards-view');
+            document.getElementById('fc-level-title').innerText = "Gyakorlandó Szavak";
+            renderFlashcard();
+        }
+
+        function nextFlashcard(known) {
+            const currentCard = currentFlashcards[fcIndex];
+            if (known) {
+                fcScore++;
+                updatePracticeList(currentCard, false);
+            } else {
+                fcWrong.push(currentCard);
+                updatePracticeList(currentCard, true);
+            }
+
+            fcIndex++;
+            if (fcIndex < currentFlashcards.length) {
+                renderFlashcard();
+            } else {
+                alert(`Vége a gyakorlásnak! Eredmény: ${fcScore} / ${currentFlashcards.length}`);
+                showMenu();
+            }
+        }
+
+        function speakFlashcard(event) {
+            event.stopPropagation(); // Ne forduljon vissza a kártya
+            if ('speechSynthesis' in window) {
+                const text = currentFlashcards[fcIndex].en;
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
         function showVocabulary() {
             showScreen('vocabulary-view');
             
@@ -990,7 +1249,7 @@
 
         // Képernyőváltó segédfüggvény
         function showScreen(screenId) {
-            const screens = ['menu', 'quiz', 'reading-practice', 'sentence-builder', 'vocabulary-view'];
+            const screens = ['menu', 'quiz', 'reading-practice', 'sentence-builder', 'vocabulary-view', 'flashcards-view'];
             screens.forEach(id => document.getElementById(id).classList.add('hidden'));
             
             const target = document.getElementById(screenId);
@@ -1052,6 +1311,7 @@
 
         // Inicializálás betöltéskor
         updateStatsUI();
+        updatePracticeCountUI();
 
         // PWA Service Worker és Telepítés logika
         if ('serviceWorker' in navigator) {
