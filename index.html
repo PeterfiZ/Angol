@@ -140,6 +140,7 @@
             user-select: none;
             transition: transform 0.1s, background-color 0.2s;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: relative;
         }
         .word-chip:hover {
             background-color: #bbdefb; 
@@ -147,6 +148,34 @@
         }
         .word-chip:active {
             transform: translateY(0);
+        }
+        
+        /* Szóinformáció tooltip */
+        .word-info-tooltip {
+            position: absolute;
+            background: linear-gradient(135deg, #fff176 0%, #fff59d 100%);
+            border: 2px solid #FFA000;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            pointer-events: none;
+            display: none;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: normal;
+            color: #333;
+        }
+        .word-chip:hover .word-info-tooltip {
+            display: block;
+            animation: tooltipFade 0.3s ease;
+        }
+        @keyframes tooltipFade {
+            from { opacity: 0; transform: translateX(-50%) translateY(5px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
         
         /* Grid a gomboknak */
@@ -187,6 +216,243 @@
             background-color: var(--primary-color);
             width: 0%;
             transition: width 0.3s ease, background-color 0.3s ease;
+        }
+        
+        /* Szójavaslat stílusa */
+        .word-suggestion-panel {
+            background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+            border: 2px solid var(--primary-color);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: left;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        .word-suggestion-panel.show {
+            display: block;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .suggestion-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+        .suggestion-item {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin: 5px 0;
+            border-left: 4px solid var(--primary-color);
+            font-size: 0.9em;
+            color: #333;
+        }
+        .suggestion-item strong {
+            color: var(--primary-color);
+        }
+        .word-chip.suggested {
+            background-color: #c8e6c9;
+            color: #1b5e20;
+            font-weight: 600;
+            border: 2px solid var(--primary-color);
+        }
+        .hint-button {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            transition: all 0.2s ease;
+        }
+        .hint-button:hover {
+            background-color: #1976D2;
+            transform: translateY(-2px);
+        }
+        .hint-button:disabled {
+            background-color: #bdbdbd;
+            cursor: not-allowed;
+            transform: none;
+        }
+        /* Szintfelmérés CSS */
+        .placement-progress { margin: 20px 0; text-align: center; }
+        .placement-score-bar { width: 100%; background: #e0e0e0; border-radius: 8px; height: 15px; margin: 10px 0; overflow: hidden; }
+        .placement-score-fill { height: 100%; background: linear-gradient(90deg, #4CAF50, #2196F3); width: 0%; transition: width 0.3s ease; }
+        .placement-result { background: linear-gradient(135deg, #f0f4c3 0%, #e8f5e9 100%); border-left: 5px solid #4CAF50; padding: 15px; border-radius: 8px; margin: 15px 0; text-align: left; }
+        .placement-result-level { font-size: 1.5em; color: #4CAF50; font-weight: 700; margin: 10px 0; }
+        .placement-result-desc { color: #666; margin: 5px 0; line-height: 1.5; }
+        .word-family-card { background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; margin: 10px 0; cursor: pointer; transition: all 0.2s ease; }
+        .word-family-card:hover { background: #f5f5f5; border-color: #4CAF50; }
+        .word-family-title { font-weight: 600; color: #4CAF50; font-size: 1.1em; margin-bottom: 8px; }
+        .word-family-forms { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+        .word-form { background: #e3f2fd; color: #1565c0; padding: 6px 12px; border-radius: 6px; font-size: 0.9em; font-weight: 500; }
+        .word-family-example { color: #888; font-size: 0.85em; margin-top: 8px; font-style: italic; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            min-height: 48px;
+            line-height: 1.25;
+            text-align: center;
+            touch-action: manipulation;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .icon-button {
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            width: 44px !important;
+            height: 44px !important;
+            min-width: 44px;
+            padding: 0 !important;
+            border-radius: 50% !important;
+            line-height: 1;
+            flex: 0 0 44px;
+            touch-action: manipulation;
+        }
+        .question-row,
+        .action-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .action-row {
+            flex-wrap: wrap;
+        }
+        .reading-controls,
+        .flashcard-controls {
+            flex-wrap: wrap;
+        }
+        .reading-controls .btn,
+        .flashcard-controls .btn,
+        .action-row .btn,
+        .action-row .hint-button {
+            flex: 1 1 135px;
+            max-width: none;
+            margin: 0;
+        }
+        .compact-actions .btn,
+        .compact-actions .hint-button {
+            flex-basis: 105px;
+            min-width: 0 !important;
+        }
+        .practice-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            gap: 10px;
+        }
+        .practice-item-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 120px;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                align-items: flex-start;
+                padding: 10px 0;
+            }
+            .container {
+                width: calc(100% - 20px);
+                padding: 1rem;
+                border-radius: 12px;
+            }
+            h1 { font-size: 1.65rem; }
+            h2 { font-size: 1.35rem; }
+            h3 {
+                font-size: 1rem;
+                margin-top: 1.35rem;
+            }
+            .grid-buttons {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+            }
+            .grid-buttons .btn {
+                padding: 12px 8px;
+                min-height: 46px;
+                font-size: 0.95rem;
+            }
+            .question-row {
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .question-row h3 {
+                flex: 1;
+                text-align: left;
+                margin-top: 0;
+            }
+            .reading-controls,
+            .flashcard-controls,
+            .action-row {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+            }
+            .reading-controls .btn,
+            .flashcard-controls .btn,
+            .action-row .btn,
+            .action-row .hint-button {
+                width: 100% !important;
+                min-width: 0 !important;
+                padding: 12px 8px;
+                font-size: 0.95rem;
+            }
+            .compact-actions {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+            .icon-button {
+                width: 42px !important;
+                height: 42px !important;
+                min-width: 42px;
+                font-size: 1.25rem !important;
+            }
+            .word-chip {
+                padding: 10px 14px;
+                min-height: 42px;
+            }
+            .practice-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .practice-item-actions {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                min-width: 0;
+            }
+            .practice-item-actions .btn {
+                width: 100%;
+                min-width: 0;
+                padding: 10px 6px !important;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .grid-buttons,
+            .reading-controls,
+            .flashcard-controls,
+            .action-row,
+            .compact-actions {
+                grid-template-columns: 1fr;
+            }
+            .practice-item-actions {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -230,13 +496,22 @@
             <button class="btn" onclick="startReading('C2')">C2</button>
         </div>
 
-        <h3>🃏 Szókártyák (HU ➡️ EN)</h3>
+        <h3>🃏 Szókártyák</h3>
+        <p class="progress" style="margin-bottom: 8px;">Magyar → angol</p>
         <div class="grid-buttons">
-            <button class="btn" onclick="startFlashcards('A1')">A1</button>
-            <button class="btn" onclick="startFlashcards('A2')">A2</button>
-            <button class="btn" onclick="startFlashcards('B1')">B1</button>
-            <button class="btn" onclick="startFlashcards('B2')">B2</button>
+            <button class="btn" onclick="startFlashcards('A1', 'hu-en')">A1</button>
+            <button class="btn" onclick="startFlashcards('A2', 'hu-en')">A2</button>
+            <button class="btn" onclick="startFlashcards('B1', 'hu-en')">B1</button>
+            <button class="btn" onclick="startFlashcards('B2', 'hu-en')">B2</button>
+        </div>
+        <p class="progress" style="margin-bottom: 8px;">Angol → magyar</p>
+        <div class="grid-buttons">
+            <button class="btn" onclick="startFlashcards('A1', 'en-hu')">A1</button>
+            <button class="btn" onclick="startFlashcards('A2', 'en-hu')">A2</button>
+            <button class="btn" onclick="startFlashcards('B1', 'en-hu')">B1</button>
+            <button class="btn" onclick="startFlashcards('B2', 'en-hu')">B2</button>
             <button class="btn" style="background-color: #FF9800;" onclick="startPracticeFlashcards()">Gyakorlandó 📝 <span id="practice-count" style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 10px; font-size: 0.8em;">0</span></button>
+            <button class="btn btn-option" style="background-color: white; color: #333; max-width: 150px;" onclick="showPractice()">Gyakorlandó lista</button>
         </div>
 
         <h3>🧩 Mondatépítő</h3>
@@ -249,7 +524,16 @@
             <button class="btn" onclick="startSentenceBuilder('C2')">C2</button>
         </div>
 
+        <h3>✍️ Írásgyakorlat</h3>
+        <div class="grid-buttons">
+            <button class="btn" onclick="startWritingPractice('A1')">A1</button>
+            <button class="btn" onclick="startWritingPractice('A2')">A2</button>
+            <button class="btn" onclick="startWritingPractice('B1')">B1</button>
+            <button class="btn" onclick="startWritingPractice('B2')">B2</button>
+        </div>
+
         <div style="margin-top: 20px;">
+            <button class="btn" style="background-color: #FF6F00; font-weight: 600;" onclick="startPlacementTest()">🎯 Szintfelmérés Teszt</button>
             <button class="btn" style="background-color: #0288d1;" onclick="showVocabulary()">📚 Szókincs Tár</button>
             <button class="btn" id="installBtn" style="display:none; background-color: #FF5722;">📲 App Telepítése</button>
         </div>
@@ -272,9 +556,9 @@
     <div class="container hidden" id="quiz">
         <h2 id="level-title">Szint</h2>
         <p class="progress">Kérdés: <span id="q-num">1</span> | Pontszám: <span id="score-display">0</span> | Idő: <span id="timer">30</span>mp <span id="global-timer-wrapper" class="hidden">| Hátralévő: <span id="global-timer">00:00</span></span></p>
-        <div style="margin: 30px 0; display: flex; justify-content: center; align-items: center; gap: 10px;">
+        <div class="question-row" style="margin: 30px 0;">
             <h3 id="question-text" style="margin: 0;">Kérdés helye</h3>
-            <button onclick="speakCurrentQuestion()" style="background: none; border: none; cursor: pointer; font-size: 1.5em;" title="Kiejtés">🔊</button>
+            <button class="icon-button" onclick="speakCurrentQuestion()" style="background: none; border: none; cursor: pointer; font-size: 1.5em;" title="Kiejtés">🔊</button>
         </div>
         <div id="options-container"></div>
         <p id="feedback"></p>
@@ -313,19 +597,44 @@
         </div>
 
         <div id="sb-target" class="sentence-area"></div>
+        
+        <!-- Szójavaslatás panel -->
+        <div id="word-suggestion-panel" class="word-suggestion-panel">
+            <div class="suggestion-title">💡 Szójavaslatások az alábbi helyre:</div>
+            <div id="suggestion-content"></div>
+        </div>
+        
         <div id="sb-pool" class="word-pool"></div>
         
         <p id="sb-feedback"></p>
 
-        <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
-            <button class="btn" onclick="checkSentenceOrder()" style="background-color: #4CAF50; width: auto; flex: 1;">Ellenőrzés</button>
-            <button class="btn" onclick="resetSentenceTask()" style="background-color: #FF9800; width: auto; flex: 1;">Újra</button>
-            <button class="btn" onclick="showSentenceSolution()" style="background-color: #2196F3; width: auto; flex: 1;">Megoldás</button>
-            <button class="btn" onclick="speakSentence()" style="background-color: #9C27B0; width: auto; flex: 1;" title="Kiejtés">🔊</button>
+        <div class="action-row compact-actions" style="margin-bottom: 15px;">
+            <button class="btn" onclick="checkSentenceOrder()" style="background-color: #4CAF50; width: auto; flex: 1; min-width: 100px;">Ellenőrzés</button>
+            <button class="btn" onclick="resetSentenceTask()" style="background-color: #FF9800; width: auto; flex: 1; min-width: 100px;">Újra</button>
+            <button class="btn" onclick="showSentenceSolution()" style="background-color: #2196F3; width: auto; flex: 1; min-width: 100px;">Megoldás</button>
+            <button class="btn" onclick="speakSentence()" style="background-color: #9C27B0; width: auto; flex: 1; min-width: 100px;" title="Kiejtés">🔊</button>
+            <button id="hint-button" class="hint-button" onclick="showWordSuggestions()" style="flex: 1; min-width: 100px;">💡 Javaslat</button>
         </div>
         
         <button class="btn hidden" id="sb-next-btn" onclick="nextSentenceTask()">Következő</button>
         <button class="btn" style="background-color: #777; margin-top: 20px;" onclick="showMenu()">Vissza a menübe</button>
+    </div>
+
+    <!-- Írásgyakorlat felület -->
+    <div class="container hidden" id="writing-practice">
+        <h2 id="writing-level-title">Írásgyakorlat</h2>
+        <p id="writing-instructions" style="color: #666; font-size: 0.95em; margin-bottom: 1rem;"></p>
+        <div style="text-align: left; margin-bottom: 15px;">
+            <strong>Téma:</strong> <span id="writing-topic"></span><br>
+            <strong>Ajánlott hossz:</strong> <span id="writing-length"></span>
+        </div>
+        <textarea id="writing-input" style="width: 100%; min-height: 220px; border-radius: 14px; border: 2px solid #ddd; padding: 15px; font-size: 1em; line-height: 1.5; resize: vertical;" placeholder="Írd ide a fogalmazásodat angolul..."></textarea>
+        <div class="action-row" style="margin-top: 15px;">
+            <button class="btn" style="flex: 1; min-width: 140px;" onclick="evaluateWriting()">Értékelés</button>
+            <button class="btn" style="background-color: #FF9800; flex: 1; min-width: 140px;" onclick="generateNewWritingPrompt()">Új téma</button>
+            <button class="btn" style="background-color: #777; flex: 1; min-width: 140px;" onclick="showMenu()">Vissza a menübe</button>
+        </div>
+        <div id="writing-feedback" style="margin-top: 20px; text-align: left; padding: 15px; background: #fafafa; border-radius: 14px; border: 1px solid #eee; min-height: 80px; color: #333;"></div>
     </div>
 
     <!-- Szókártya felület -->
@@ -337,11 +646,11 @@
             <div class="flashcard" id="current-flashcard">
                 <div class="flashcard-face flashcard-front">
                     <p id="fc-front-text" style="font-size: 1.2em; font-weight: 500;">Magyar szó</p>
-                    <p class="fc-hint">(Kattints a fordításhoz)</p>
+                    <p class="fc-hint" id="fc-hint">(Kattints a fordításhoz)</p>
                 </div>
                 <div class="flashcard-face flashcard-back">
                     <p id="fc-back-text" style="font-size: 1.2em; font-weight: 600;">English Word</p>
-                    <button onclick="speakFlashcard(event)" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; margin-top: 10px;" title="Kiejtés">🔊</button>
+                    <button class="icon-button" onclick="speakFlashcard(event)" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; margin-top: 10px;" title="Kiejtés">🔊</button>
                 </div>
             </div>
         </div>
@@ -354,10 +663,76 @@
         <button class="btn" style="background-color: #777; margin-top: 20px;" onclick="showMenu()">Vissza a menübe</button>
     </div>
 
+    <!-- Szintfelmérés teszt -->
+    <div class="container hidden" id="placement-test" style="max-width: 700px;">
+        <h2 id="pt-title">Szintfelmérés Teszt</h2>
+        <p id="pt-intro" style="color: #666; font-size: 0.95em; margin-bottom: 20px;">Ez a teszt meghatározza az angol szintedet. Válassz a helyes válasz közül. ⏱️ Korlátlan idő.</p>
+        
+        <div class="placement-progress">
+            <p class="progress">Kérdés: <span id="pt-q-num">1</span> / <span id="pt-q-total">50</span></p>
+            <div class="placement-score-bar"><div id="pt-score-bar" class="placement-score-fill" style="width: 0%;"></div></div>
+        </div>
+        
+        <div class="question-row" style="margin: 20px 0;">
+            <h3 id="pt-question" style="margin: 0;">Kérdés</h3>
+            <button class="icon-button" onclick="speakPlacementQuestion()" style="background: none; border: none; cursor: pointer; font-size: 1.5em;" title="Kiejtés">🔊</button>
+        </div>
+        
+        <div id="pt-options" style="display: grid; gap: 10px; margin: 20px 0;"></div>
+        <p id="pt-feedback" style="margin-top: 15px; font-weight: bold; min-height: 24px;"></p>
+        
+        <button class="btn hidden" id="pt-next-btn" onclick="nextPlacementQuestion()" style="margin-top: 20px; width: 100%;">Következő kérdés →</button>
+        <button class="btn" style="background-color: #777; margin-top: 20px; width: 100%;" onclick="showMenu()">Mégse (vissza a menübe)</button>
+    </div>
+
+    <!-- Szintfelmérés eredmény -->
+    <div class="container hidden" id="placement-result" style="max-width: 600px;">
+        <h2>🎉 Szintfelmérés Eredmény</h2>
+        <div class="placement-result">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <p style="font-size: 2em; font-weight: 700; color: #4CAF50;" id="pr-score">0/50</p>
+                <div class="placement-score-bar"><div id="pr-score-bar" class="placement-score-fill" style="width: 0%;"></div></div>
+            </div>
+            <div id="pr-level-info" style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #4CAF50;">
+                <p class="placement-result-level" id="pr-level">A1</p>
+                <p class="placement-result-desc" id="pr-description">Leírás...</p>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+                    <strong style="color: #4CAF50;">💡 Ajánlások:</strong>
+                    <ul id="pr-recommendations" style="margin: 8px 0; padding-left: 20px;">
+                        <li>Ajánlás 1</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="action-row" style="margin-top: 20px;">
+            <button class="btn" onclick="showMenu()" style="flex: 1;">Vissza a menübe</button>
+            <button class="btn" style="background-color: #FF6F00; flex: 1;" onclick="startPlacementTest()">Újra próbálni</button>
+        </div>
+    </div>
+
     <!-- Szókincs felület -->
     <div class="container hidden" id="vocabulary-view" style="max-width: 800px;">
         <h2>Szókincs és Nyelvtan</h2>
+        <div class="action-row" style="margin-bottom: 15px;">
+            <button class="btn btn-option" style="background-color: white; min-width: 150px;" onclick="toggleWordFamilies()">📚 Szócsaládok</button>
+            <button class="btn btn-option" style="background-color: white; min-width: 150px;" onclick="toggleVocabByLevel()">📖 Szókincs szintenként</button>
+            <button class="btn btn-option" style="background-color: white; min-width: 150px;" onclick="toggleGrammarLessons()">🔤 Nyelvtani leckék</button>
+            <button id="vocab-filter-btn" class="btn btn-option" style="background-color: white; min-width: 150px;" onclick="toggleFilterNewWords()">🔎 Csak új szavak (OFF)</button>
+        </div>
+        <div id="vocab-filter-info" style="color:#666; font-size:0.9em; margin-bottom:12px; text-align:center;"></div>
         <div id="vocab-content" style="max-height: 60vh; overflow-y: auto; padding-right: 5px;"></div>
+        <button class="btn" style="background-color: #777; margin-top: 20px;" onclick="showMenu()">Vissza a menübe</button>
+    </div>
+
+    <!-- Gyakorlandó lista felület -->
+    <div class="container hidden" id="practice-view" style="max-width: 800px;">
+        <h2>Gyakorlandó Tételek</h2>
+        <p style="color: #666; font-size: 0.95em;">Itt láthatod azokat a tételeket, amiket a program gyűjtött a hibáid alapján. Szerkesztheted a megjegyzést, törölheted, vagy külön gyakorolhatod őket.</p>
+        <div id="practice-list" style="max-height: 60vh; overflow-y: auto; text-align: left; margin-top: 12px; padding-right: 6px;"></div>
+        <div class="action-row" style="margin-top: 18px;">
+            <button class="btn" style="background-color: #4CAF50;" onclick="startPracticeFlashcards()">Gyakorlás (minden tétel)</button>
+            <button class="btn" style="background-color: #FF9800;" onclick="clearPracticeList()">Összes törlése</button>
+        </div>
         <button class="btn" style="background-color: #777; margin-top: 20px;" onclick="showMenu()">Vissza a menübe</button>
     </div>
 
@@ -413,6 +788,163 @@
                 { text: "Economically, an ageing population affects both the supply and demand sides. On the supply side, a declining working-age population can reduce labour availability and slow potential growth. Employers in many sectors already report shortages of skilled and semi-skilled workers, which may push up wages and production costs, particularly in labour-intensive industries such as healthcare and construction. On the demand side, consumption patterns shift: older cohorts tend to spend more on health and housing adaptations and less on durable goods.", translation: "Gazdaságilag az elöregedő népesség mind a kínálati, mind a keresleti oldalt érinti. A kínálati oldalon a csökkenő munkaképes korú népesség csökkentheti a munkaerő rendelkezésre állását és lassíthatja a potenciális növekedést. Sok ágazatban a munkaadók már most is szakképzett és betanított munkások hiányáról számolnak be, ami felhajthatja a béreket és a termelési költségeket, különösen a munkaerő-igényes iparágakban, mint például az egészségügy és az építőipar. A keresleti oldalon a fogyasztási szokások megváltoznak: az idősebb korosztályok hajlamosak többet költeni egészségügyre és lakhatási átalakításokra, és kevesebbet tartós fogyasztási cikkekre." }
             ]
         };
+
+        const writingPrompts = {
+            'A1': [
+                { topic: "My family", min: 3, max: 4 },
+                { topic: "My favorite food", min: 3, max: 4 },
+                { topic: "My room", min: 3, max: 4 },
+                { topic: "A day at school", min: 3, max: 4 }
+            ],
+            'A2': [
+                { topic: "My last holiday", min: 4, max: 5 },
+                { topic: "My daily routine", min: 4, max: 5 },
+                { topic: "My best friend", min: 4, max: 5 },
+                { topic: "My favorite hobby", min: 4, max: 5 }
+            ],
+            'B1': [
+                { topic: "A typical weekend", min: 5, max: 7 },
+                { topic: "Why I study English", min: 5, max: 7 },
+                { topic: "My dream job", min: 5, max: 7 },
+                { topic: "A memorable trip", min: 5, max: 7 }
+            ],
+            'B2': [
+                { topic: "The advantages of learning English", min: 6, max: 8 },
+                { topic: "How to stay healthy", min: 6, max: 8 },
+                { topic: "A hobby I enjoy", min: 6, max: 8 },
+                { topic: "A city I would like to visit", min: 6, max: 8 }
+            ]
+        };
+
+        const grammarPatterns = [
+            { pattern: /\bI has\b/gi, message: "Használj 'I have' helyett 'I has' helyett.", explanation: "A személyes névmás 'I' után az 'have' a megfelelő alak, pl. 'I have a cat.'", link: "https://learnenglish.britishcouncil.org/grammar/english-grammar-reference/present-simple" },
+            { pattern: /\b(he|she|it) have\b/gi, message: "Harmadik személyben használd a 'has' formát: he/she/it has.", explanation: "A jelen egyszerű 3. személy egyes számában az ige -s végződést kap: 'He has a car.'", link: "https://learnenglish.britishcouncil.org/grammar/english-grammar-reference/present-simple" },
+            { pattern: /\b(he|she|it) do\b/gi, message: "Harmadik személyben használd a 'does' formát: he/she/it does.", explanation: "Kérdő- és tagmondatokban a 'do' segédigéből 'does' lesz 3. személyben: 'Does she like it?'", link: "https://dictionary.cambridge.org/grammar/british-grammar/does" },
+            { pattern: /\b(he|she|it) don't\b/gi, message: "Harmadik személyben használd a 'doesn't' formát: he/she/it doesn't.", explanation: "Tagadásnál a 'do not' 3. személyben 'does not' lesz (rövidítve 'doesn't').", link: "https://learnenglish.britishcouncil.org/grammar/english-grammar-reference/present-simple" },
+            { pattern: /\b(you|we|they) is\b/gi, message: "Használj 'are' formát: you/we/they are.", explanation: "A 'to be' ige többes szám alanyaival 'are' formát használunk: 'They are happy.'", link: "https://learnenglish.britishcouncil.org/grammar/english-grammar-reference/to-be" },
+            { pattern: /\b(he|she|it) are\b/gi, message: "Használj 'is' formát: he/she/it is.", explanation: "3. személy egyes szám alanyaival az 'is' használatos: 'She is late.'", link: "https://learnenglish.britishcouncil.org/grammar/english-grammar-reference/to-be" },
+            { pattern: /\bthere is many\b/gi, message: "Használj 'there are many' többes szám esetén.", explanation: "'There is' egyes számra vonatkozik; többes számnál 'there are': 'There are many people.'", link: "https://www.ef.com/wwen/english-resources/english-grammar/there-is-there-are/" },
+            { pattern: /\ba\s+\w+s\b/gi, message: "Többes számú főnév előtt ne használj 'a' névelőt.", explanation: "A határozatlan névelő 'a/an' egyes számú főnevet kísér; többes számnál használj 'some' vagy semmi névelőt.", link: "https://learnenglish.britishcouncil.org/grammar/english-grammar-reference/articles" },
+            { pattern: /\bI goed\b/gi, message: "A helyes forma 'I went' múlt időben.", explanation: "Néhány ige rendhagyó múltidejű alakot használ: 'go' -> 'went'.", link: "https://www.ef.com/wwen/english-resources/english-grammar/irregular-verbs/" },
+            { pattern: /\bI don't has\b/gi, message: "A helyes forma 'I don't have'.", explanation: "A 'do' segédige után mindig az alapforma áll: 'do not have'.", link: "https://learnenglish.britishcouncil.org/grammar/english-grammar-reference/verbs" },
+            { pattern: /\bI have went\b/gi, level: ['B1','B2'], message: "A helyes forma 'I have gone'.", explanation: "A present perfecthez a rendhagyó ige harmadik alakját használjuk: 'go' -> 'gone'.", link: "https://learnenglish.britishcouncil.org/grammar/english-grammar-reference/present-perfect" },
+            { pattern: /\bmany informations\b/gi, level: ['B1','B2'], message: "Az 'information' általában megszámlálhatatlan.", explanation: "Az 'information' egy nem számlálható főnév; használd a 'much information' kifejezést.", link: "https://dictionary.cambridge.org/grammar/british-grammar/nouns" },
+            { pattern: /\bI have saw\b/gi, level: ['B1','B2'], message: "A helyes forma 'I have seen'.", explanation: "A present perfectben a 'see' ige participle alakja 'seen'.", link: "https://learnenglish.britishcouncil.org/grammar/english-grammar-reference/present-perfect" },
+            { pattern: /\bI have ate\b/gi, level: ['B1','B2'], message: "A helyes forma 'I have eaten'.", explanation: "A 'eat' participle alakja 'eaten' a present perfectben: 'I have eaten.'", link: "https://learnenglish.britishcouncil.org/grammar/english-grammar-reference/present-perfect" },
+            { pattern: /\bI didn't went\b/gi, level: ['B1','B2'], message: "A helyes forma 'I didn't go'.", explanation: "A múlt idejű tagadásnál az alapforma használatos: 'did n't go'.", link: "https://dictionary.cambridge.org/grammar/british-grammar/did" },
+            { pattern: /\bI am agree\b/gi, level: ['B1','B2'], message: "Használj 'I agree', ne 'I am agree'.", explanation: "'Agree' általában állapotot fejez ki, nem melléknévként: 'I agree with you.'", link: "https://www.ef.com/wwen/english-resources/english-grammar/verbal-expressions/" },
+            { pattern: /\bI am boring\b/gi, level: ['B1','B2'], message: "Használj 'I am bored', ha unalmasnak érzed magad.", explanation: "'Boring' valami, ami unalmat kelt; 'bored' az érzés, amit átérzel.", link: "https://dictionary.cambridge.org/grammar/british-grammar/adjectives" },
+            { pattern: /\bcan to\b/gi, level: ['B1','B2'], message: "A 'can' után nem kell a 'to': 'can go'.", explanation: "A 'can' modális segédige után az ige első alakja áll, nem 'to' + infinitive.", link: "https://learnenglish.britishcouncil.org/grammar/english-grammar-reference/modals" },
+            { pattern: /\bI look forward to meet\b/gi, level: ['B1','B2'], message: "A 'look forward to' után gerundiumot használj: 'meeting'.", explanation: "A 'to' ebben a kifejezésben elöljáró, ezért gerundium követi: 'look forward to meeting you'.", link: "https://learnenglish.britishcouncil.org/grammar/english-grammar-reference/verbs" },
+            { pattern: /\bif I will\b/gi, level: ['B1','B2'], message: "If-mondatban ne használd a 'will'-t: 'if I go'.", explanation: "A feltételes mondatokban a 'will' általában nem szerepel az 'if' részben: 'If it rains, I will stay home.'", link: "https://learnenglish.britishcouncil.org/grammar/english-grammar-reference/conditionals" },
+            { pattern: /\bI would rather you to\b/gi, level: ['B1','B2'], message: "A 'would rather' után ne használd a 'to' segédigét.", explanation: "A szerkezet: 'I would rather you did something' (nem 'to').", link: "https://dictionary.cambridge.org/grammar/british-grammar/would-rather" }
+        ];
+
+        function isGrammarRuleApplicable(rule, level) {
+            if (!rule.level) return true;
+            return Array.isArray(rule.level) && rule.level.includes(level);
+        }
+
+        function selectWritingPrompt(level) {
+            const prompts = writingPrompts[level] || [];
+            if (prompts.length === 0) return { topic: "Write about something simple.", min: 4, max: 6 };
+            return prompts[Math.floor(Math.random() * prompts.length)];
+        }
+
+        function startWritingPractice(level) {
+            currentLevel = level;
+            showScreen('writing-practice');
+            document.getElementById('writing-level-title').innerText = level + " Szint - Írásgyakorlat";
+            generateNewWritingPrompt();
+            document.getElementById('writing-input').value = '';
+            document.getElementById('writing-feedback').innerHTML = '';
+        }
+
+        function generateNewWritingPrompt() {
+            const prompt = selectWritingPrompt(currentLevel);
+            document.getElementById('writing-topic').innerText = prompt.topic;
+            document.getElementById('writing-length').innerText = `${prompt.min}-${prompt.max} mondat`;
+            document.getElementById('writing-instructions').innerText = `Írj egy rövid fogalmazást az alábbi témában angolul. Próbáld meg a javasolt mondatszámot betartani.`;
+            document.getElementById('writing-input').dataset.min = prompt.min;
+            document.getElementById('writing-input').dataset.max = prompt.max;
+        }
+
+        function evaluateWriting() {
+            const textarea = document.getElementById('writing-input');
+            const text = textarea.value.trim();
+            const feedback = document.getElementById('writing-feedback');
+            const min = parseInt(textarea.dataset.min || '4', 10);
+            const max = parseInt(textarea.dataset.max || '6', 10);
+
+            if (text.length === 0) {
+                feedback.innerHTML = '<span class="wrong">Kérlek, írj legalább néhány mondatot a fogalmazáshoz.</span>';
+                return;
+            }
+
+            const sentences = text.split(/[.!?]+/).map(s => s.trim()).filter(Boolean);
+            const wordCount = text.split(/\s+/).filter(Boolean).length;
+            const sentenceCount = sentences.length;
+            const issues = [];
+
+            if (sentenceCount < min || sentenceCount > max) {
+                issues.push(`A fogalmazás ${sentenceCount} mondatból áll. Ajánlott: ${min}-${max} mondat.`);
+            }
+
+            if (!/^[A-ZÁÉÍÓÖŐÚÜŰ]/.test(text)) {
+                issues.push('A fogalmazás első szava nagybetűvel kezdődjön.');
+            }
+
+            if (!/[.!?]$/.test(text)) {
+                issues.push('A mondatot ponttal, kérdőjellel vagy felkiáltó jellel zárd.');
+            }
+
+            issues.push(...grammarPatterns.filter(rule => isGrammarRuleApplicable(rule, currentLevel) && rule.pattern.test(text)).map(rule => rule.message));
+            issues.push(...detectRepeatedWords(text));
+
+            const qualityComments = [];
+            if (sentenceCount >= min && sentenceCount <= max) {
+                qualityComments.push('A hossz megfelelő.');
+            }
+            if (wordCount < 25) {
+                qualityComments.push('Próbálj meg kissé bővebben fogalmazni, hogy több részlet kerüljön bele.');
+            }
+
+            let score = 0;
+            if (issues.length === 0) score = 100;
+            else if (issues.length <= 2) score = 80;
+            else if (issues.length <= 4) score = 60;
+            else score = 40;
+
+            let html = `<div style="font-weight: 600; margin-bottom: 10px;">Értékelés: ${score}%</div>`;
+            html += `<div style="margin-bottom: 10px;">Mondatok száma: <strong>${sentenceCount}</strong>, szavak száma: <strong>${wordCount}</strong>.</div>`;
+
+            if (issues.length > 0) {
+                html += '<div style="margin-bottom: 10px;"><strong>Javítási javaslatok:</strong><ul style="margin-top:8px; padding-left:20px; color:#d84315;">';
+                issues.forEach(item => html += `<li>${item}</li>`);
+                html += '</ul></div>';
+            } else {
+                html += '<div style="color:#2e7d32; font-weight:600;">Nagyszerű! A fogalmazás nyelvtanilag rendben van.</div>';
+            }
+
+            if (qualityComments.length > 0) {
+                html += '<div style="margin-top: 10px; color:#555;"><strong>További észrevételek:</strong><ul style="margin-top:8px; padding-left:20px;">';
+                qualityComments.forEach(item => html += `<li>${item}</li>`);
+                html += '</ul></div>';
+            }
+
+            feedback.innerHTML = html;
+        }
+
+        function detectRepeatedWords(text) {
+            const words = text.toLowerCase().replace(/[.,!?;:\"'()]/g, '').split(/\s+/).filter(Boolean);
+            const issues = [];
+            for (let i = 0; i < words.length - 1; i++) {
+                if (words[i] === words[i + 1] && words[i].length > 2) {
+                    issues.push(`Észrevettem ismétlődő szót: '${words[i]} ${words[i + 1]}'. Ellenőrizd újra a mondatot.`);
+                }
+            }
+            return issues;
+        }
 
         const sentenceDatabase = {
             'A1': [
@@ -522,6 +1054,7 @@
         let fcScore = 0;
         let fcWrong = [];
         let isFcRetry = false;
+        let flashcardDirection = 'hu-en';
 
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -627,11 +1160,19 @@
         function handleTimeout() {
             const buttons = document.querySelectorAll('.btn-option');
             buttons.forEach(b => b.disabled = true);
-            document.getElementById('feedback').innerText = "Lejárt az idő! ⏰ A helyes: " + currentQuestions[currentIndex].options[currentQuestions[currentIndex].a];
+            const correctText = currentQuestions[currentIndex].options[currentQuestions[currentIndex].a];
+            document.getElementById('feedback').innerText = "Lejárt az idő! ⏰ A helyes: " + correctText;
             document.getElementById('feedback').className = "wrong";
             document.getElementById('next-btn').classList.remove('hidden');
             questionsAttempted++;
+            // Gyűjtsük a hibás választ a hibák közé és adjuk hozzá a gyakorló listához
             wrongAnswers.push(currentQuestions[currentIndex]);
+            try {
+                const note = generatePracticeNote(currentQuestions[currentIndex].q, correctText, currentLevel);
+                updatePracticeList({ en: currentQuestions[currentIndex].q, hu: correctText, note }, true);
+            } catch (e) {
+                console.warn('Practice list update failed', e);
+            }
         }
 
         function speakCurrentQuestion() {
@@ -657,12 +1198,28 @@
                 btnElement.style.color = 'white';
                 document.getElementById('feedback').innerText = "Helyes válasz! 🎉";
                 document.getElementById('feedback').className = "correct";
+                // Ha a felhasználó helyes választ adott, jelöljük a kérdésben szereplő szavakat tanultként
+                try {
+                    const text = currentQuestions[currentIndex].q;
+                    const words = text.split(' ').filter(w => w.length > 1).map(w => w.replace(/[.,!?;:]/g, ''));
+                    markWordsLearned(words);
+                } catch (e) {
+                    console.warn('Learned words update failed', e);
+                }
             } else {
                 btnElement.style.backgroundColor = '#f44336';
                 btnElement.style.color = 'white';
                 document.getElementById('feedback').innerText = "Sajnos nem. A helyes: " + currentQuestions[currentIndex].options[correct];
                 document.getElementById('feedback').className = "wrong";
+                // Mentés hibásként és hozzáadás a gyakorló csomaghoz
                 wrongAnswers.push(currentQuestions[currentIndex]);
+                try {
+                    const correctText = currentQuestions[currentIndex].options[correct];
+                    const note = generatePracticeNote(currentQuestions[currentIndex].q, correctText, currentLevel);
+                    updatePracticeList({ en: currentQuestions[currentIndex].q, hu: correctText, note }, true);
+                } catch (e) {
+                    console.warn('Practice list update failed', e);
+                }
             }
             document.getElementById('next-btn').classList.remove('hidden');
         }
@@ -909,6 +1466,65 @@
             return Math.round((matches / originalWords.length) * 100);
         }
 
+        // Szófaji adatbázis - szavakhoz szófaj és hint információk
+        const wordPartOfSpeech = {
+            // Nagyon gyakori szavak összes szint számára
+            'I': { pos: 'személyes névmás', hint: 'A mondatnak gyakran egy személyes névmással kell kezdődnie' },
+            'is': { pos: 'ige (lenni)', hint: 'Segédige, amely után jelzők vagy főnevek jöhetnek' },
+            'are': { pos: 'ige (lenni)', hint: 'A "be" ige többes számú alakja' },
+            'am': { pos: 'ige (lenni)', hint: 'Az "I" után az "am" forma használatos' },
+            'a': { pos: 'névelő', hint: 'Határozatlan névelő egyes szám előtt' },
+            'the': { pos: 'névelő', hint: 'Határozott névelő, amely ismert dolgokra utal' },
+            'have': { pos: 'ige (van)', hint: 'Possessive ige, amely után főnév jöhet' },
+            'has': { pos: 'ige (van)', hint: 'A "have" harmadik személyű alakja' },
+            'and': { pos: 'kötőszó', hint: 'Két elem összekapcsolására használatos' },
+            'in': { pos: 'elöljáró', hint: 'Helyet vagy időt jelöl' },
+            'to': { pos: 'elöljáró/infinitivusz', hint: 'Irányultság vagy infinitivusz marker' },
+            'of': { pos: 'elöljáró', hint: 'Tulajdonság vagy kategória jelzésére' },
+            'for': { pos: 'elöljáró', hint: 'Célt vagy okot jelöl' },
+            'with': { pos: 'elöljáró', hint: 'Közös cselekvést vagy eszközt jelöl' },
+            'be': { pos: 'ige (lenni)', hint: 'Alap infinitivusz forma' },
+            'was': { pos: 'ige (múlt)', hint: 'Az "am/is" múlt ideje' },
+            'were': { pos: 'ige (múlt)', hint: 'Az "are" múlt ideje' },
+            'can': { pos: 'modális ige', hint: 'Képesség vagy lehetőség jelzésére' },
+            'could': { pos: 'modális ige', hint: 'Múltbeli képesség vagy lehetőség' },
+            'should': { pos: 'modális ige', hint: 'Tanács vagy ajánlás adásához' },
+            'would': { pos: 'modális ige', hint: 'Felételes formákat alkot' },
+            'will': { pos: 'modális ige', hint: 'Jövő idő jelzésére' },
+            'do': { pos: 'segédige', hint: 'Kérdések és tagadások képzésében használatos' },
+            'does': { pos: 'segédige', hint: 'A "do" harmadik személyű alakja' },
+            'did': { pos: 'segédige (múlt)', hint: 'A múlt idő segédigéje' },
+            'my': { pos: 'birtokos melléknév', hint: 'Személyes birtokosság jelzésére' },
+            'this': { pos: 'demonstratív', hint: 'Közeli dolog jelzésére' },
+            'that': { pos: 'demonstratív', hint: 'Távolabbi dolog jelzésére' },
+            'what': { pos: 'kérdő szó', hint: 'Mit-re vonatkozó kérdések kezdete' },
+            'which': { pos: 'kérdő szó', hint: 'Választást vagy kijelölést kifejez' },
+            'who': { pos: 'kérdő szó', hint: 'Kit-re vonatkozó kérdések kezdete' },
+            'where': { pos: 'kérdő szó', hint: 'Helyet kifejez' },
+            'when': { pos: 'kérdő szó', hint: 'Időt kifejez' },
+            'why': { pos: 'kérdő szó', hint: 'Okot kifejez' },
+            'how': { pos: 'kérdő szó', hint: 'Módot vagy mennyiséget kifejez' }
+        };
+
+        // Szóhasználati javaslatok - mely szavak szorosabban kapcsolódnak egymáshoz
+        const wordAssociations = {
+            'I': ['like', 'have', 'am', 'go', 'love', 'want', 'see', 'play'],
+            'is': ['a', 'the', 'my', 'his', 'her', 'very', 'not', 'so'],
+            'are': ['you', 'we', 'they', 'not', 'very'],
+            'have': ['a', 'the', 'my', 'his', 'her', 'some', 'no'],
+            'like': ['I', 'she', 'he', 'a', 'the', 'very', 'to'],
+            'love': ['I', 'she', 'he', 'a', 'the', 'very'],
+            'want': ['I', 'she', 'he', 'to', 'a', 'the'],
+            'the': ['cat', 'dog', 'book', 'house', 'sun', 'sky', 'bird', 'man', 'woman', 'boy', 'girl'],
+            'a': ['cat', 'dog', 'book', 'house', 'car', 'pen', 'flower', 'bird'],
+            'my': ['name', 'mother', 'father', 'sister', 'brother', 'friend', 'book', 'car'],
+            'to': ['go', 'like', 'want', 'play', 'cook', 'learn', 'read', 'swim', 'drink'],
+            'in': ['the', 'a', 'my', 'his', 'her', 'school', 'home', 'park', 'water'],
+            'on': ['the', 'a', 'my', 'his', 'her', 'table', 'bed', 'floor', 'wall'],
+            'at': ['the', 'school', 'home', 'work', 'night', 'day', 'nine'],
+            'and': ['I', 'you', 'he', 'she', 'we', 'they', 'a', 'the']
+        };
+
         // Mondatépítő funkciók
         function startSentenceBuilder(level) {
             currentLevel = level;
@@ -916,6 +1532,7 @@
             
             showScreen('sentence-builder');
             document.getElementById('sb-level-title').innerText = level + " Szint - Mondatépítő";
+            document.getElementById('word-suggestion-panel').classList.remove('show');
             
             loadSentenceTask();
         }
@@ -954,18 +1571,42 @@
             targetDiv.innerHTML = '';
             poolDiv.innerHTML = '';
             
+            // Célterület szavak (már kiválasztott)
             currentTargetWords.forEach((word, index) => {
                 const chip = document.createElement('div');
                 chip.className = 'word-chip';
                 chip.innerText = word;
+                
+                // Szófaji tooltip hozzáadása
+                const wordLower = word.toLowerCase().replace(/[.,!?;:]/g, '');
+                if (wordPartOfSpeech[wordLower]) {
+                    const info = wordPartOfSpeech[wordLower];
+                    const tooltip = document.createElement('span');
+                    tooltip.className = 'word-info-tooltip';
+                    tooltip.innerText = `${info.pos}`;
+                    chip.appendChild(tooltip);
+                }
+                
                 chip.onclick = () => moveWordToPool(index);
                 targetDiv.appendChild(chip);
             });
             
+            // Szógyűjtő szavak (még elhelyezendő)
             currentPoolWords.forEach((word, index) => {
                 const chip = document.createElement('div');
                 chip.className = 'word-chip';
                 chip.innerText = word;
+                
+                // Szófaji tooltip hozzáadása
+                const wordLower = word.toLowerCase().replace(/[.,!?;:]/g, '');
+                if (wordPartOfSpeech[wordLower]) {
+                    const info = wordPartOfSpeech[wordLower];
+                    const tooltip = document.createElement('span');
+                    tooltip.className = 'word-info-tooltip';
+                    tooltip.innerText = `${info.pos}`;
+                    chip.appendChild(tooltip);
+                }
+                
                 chip.onclick = () => moveWordToTarget(index);
                 poolDiv.appendChild(chip);
             });
@@ -1018,6 +1659,82 @@
             renderSentenceBuilder();
             document.getElementById('sb-feedback').innerText = "";
             document.getElementById('sb-feedback').className = "";
+            document.getElementById('word-suggestion-panel').classList.remove('show');
+        }
+
+        // Szójavaslatások megjelenítése
+        function showWordSuggestions() {
+            const panel = document.getElementById('word-suggestion-panel');
+            const content = document.getElementById('suggestion-content');
+            
+            if (panel.classList.contains('show')) {
+                panel.classList.remove('show');
+                return;
+            }
+            
+            const correctWords = currentCorrectSentence.split(' ');
+            const nextPosition = currentTargetWords.length;
+            
+            // Ha már minden szó elhelyezésre került
+            if (nextPosition >= correctWords.length) {
+                content.innerHTML = '<div class="suggestion-item">✓ Minden szó elhelyezésre került!</div>';
+                panel.classList.add('show');
+                return;
+            }
+            
+            const nextWord = correctWords[nextPosition];
+            let suggestions = '';
+            
+            suggestions += `<div class="suggestion-item">
+                <strong>Pozíció:</strong> Ez a szó a helyes mondat <strong>${nextPosition + 1}. helyére</strong> kerül a <strong>${correctWords.length}</strong> szóból álló mondatban.
+            </div>`;
+            
+            // Szófaji javaslat
+            if (wordPartOfSpeech[nextWord.toLowerCase()]) {
+                const info = wordPartOfSpeech[nextWord.toLowerCase()];
+                suggestions += `<div class="suggestion-item">
+                    <strong>Szófaj:</strong> ${info.pos}<br>
+                    <em>${info.hint}</em>
+                </div>`;
+            } else {
+                suggestions += `<div class="suggestion-item">
+                    <strong>Szó:</strong> "${nextWord}"<br>
+                    <em>Keress egy szót, amely illik az adott pozícióba.</em>
+                </div>`;
+            }
+            
+            // Szóhasználati tippek
+            if (currentTargetWords.length > 0) {
+                const lastWord = currentTargetWords[currentTargetWords.length - 1].toLowerCase();
+                if (wordAssociations[lastWord]) {
+                    const relatedWords = wordAssociations[lastWord];
+                    const matchedWords = currentPoolWords.filter(w => 
+                        relatedWords.includes(w.toLowerCase().replace(/[.,!?;:]/g, ''))
+                    );
+                    
+                    if (matchedWords.length > 0) {
+                        suggestions += `<div class="suggestion-item">
+                            <strong>🔗 Kapcsolódó szavak:</strong><br>
+                            Ezek a szavak jól illenek az előző szóhoz: ${matchedWords.slice(0, 3).join(', ')}
+                        </div>`;
+                    }
+                }
+            }
+            
+            // A maradék szavak listája
+            const poolWords = currentPoolWords.map(w => w.toLowerCase()).join(', ');
+            suggestions += `<div class="suggestion-item">
+                <strong>📝 Rendelkezésre álló szavak:</strong><br>
+                ${poolWords}
+            </div>`;
+            
+            // A helyes válasz hint (ha valóban szükséges)
+            suggestions += `<div class="suggestion-item" style="border-left-color: #FF9800;">
+                <strong>💡 Tipp:</strong> Az aktuális pozícióban egy <strong>"${nextWord.toLowerCase()}"</strong> kezdetű szó kell.
+            </div>`;
+            
+            content.innerHTML = suggestions;
+            panel.classList.add('show');
         }
 
         function checkSentenceOrder() {
@@ -1028,9 +1745,29 @@
                 document.getElementById('sb-feedback').innerText = "Helyes! 🎉";
                 document.getElementById('sb-feedback').className = "correct";
                 document.getElementById('sb-next-btn').classList.remove('hidden');
+                // Ha a felhasználó helyesen rakta össze, távolítsuk el a gyakorló listából (ha benne van)
+                try {
+                    updatePracticeList({ en: correctSentence, hu: '' }, false);
+                } catch (e) {
+                    console.warn('Practice remove failed', e);
+                }
             } else {
                 document.getElementById('sb-feedback').innerText = "Nem jó sorrend. Próbáld újra!";
                 document.getElementById('sb-feedback').className = "wrong";
+                try {
+                    const note = generatePracticeNote(correctSentence, '', currentLevel);
+                    updatePracticeList({ en: correctSentence, hu: '', note }, true);
+                } catch (e) {
+                    console.warn('Practice add failed', e);
+                }
+            }
+            if (userSentence === correctSentence) {
+                try {
+                    const words = correctSentence.split(' ').map(w => w.replace(/[.,!?;:]/g, ''));
+                    markWordsLearned(words);
+                } catch (e) {
+                    console.warn('Learned words update failed', e);
+                }
             }
         }
 
@@ -1076,14 +1813,14 @@
             ]
         };
 
-        function startFlashcards(level) {
+        function startFlashcards(level, direction = 'hu-en') {
             currentLevel = level;
+            flashcardDirection = direction;
             
             // 1. Próbáljuk kinyerni a szavakat a meglévő adatbázisból
             let extracted = [];
             if (database[level]) {
                 extracted = database[level].filter(item => {
-                    // Szűrjük a rövid, nem kérdőjeles, nem hiányos mondatokat
                     return !item.q.includes('___') && 
                            !item.q.includes('?') && 
                            !item.q.includes('->') &&
@@ -1093,6 +1830,14 @@
                     hu: item.options[item.a] // A helyes válasz a magyar megfelelő
                 }));
             }
+            
+            // Tanult szavak előtérbe helyezése
+            const learned = getLearnedWords();
+            extracted.sort((a, b) => {
+                const aLearned = learned.includes(a.en.toLowerCase().replace(/[.,!?;:]/g, ''));
+                const bLearned = learned.includes(b.en.toLowerCase().replace(/[.,!?;:]/g, ''));
+                return aLearned - bLearned;
+            });
 
             // 2. Ha kevés adat van, keverjük hozzá a tartalékot (vagy használjuk csak azt)
             if (fallbackVocab[level]) {
@@ -1116,17 +1861,28 @@
             isFcRetry = false;
 
             showScreen('flashcards-view');
-            document.getElementById('fc-level-title').innerText = level + " Szókártyák";
+            document.getElementById('fc-level-title').innerText = level + " Szókártyák (" + getFlashcardDirectionLabel() + ")";
             renderFlashcard();
+        }
+
+        function getFlashcardDirectionLabel() {
+            return flashcardDirection === 'hu-en' ? 'Magyar → angol' : 'Angol → magyar';
         }
 
         function renderFlashcard() {
             const card = currentFlashcards[fcIndex];
+            const isHuToEn = flashcardDirection === 'hu-en';
+            const frontText = isHuToEn ? card.hu : card.en;
+            const backText = isHuToEn ? card.en : card.hu;
             document.getElementById('fc-num').innerText = fcIndex + 1;
             document.getElementById('fc-total').innerText = currentFlashcards.length;
             
-            document.getElementById('fc-front-text').innerText = card.hu;
-            document.getElementById('fc-back-text').innerText = card.en;
+            document.getElementById('fc-front-text').innerText = frontText;
+            document.getElementById('fc-hint').innerText = isHuToEn ? '(Kattints az angol fordításhoz)' : '(Kattints a magyar jelentéshez)';
+            // Ha van magyarázó megjegyzés, jelenítsük meg a hátlapon alul
+            const backEl = document.getElementById('fc-back-text');
+            backEl.innerHTML = '';
+            backEl.innerHTML = `<div style="font-size:1.05em; font-weight:600;">${backText}</div>` + (card.note ? `<div style="margin-top:10px; font-size:0.85em; opacity:0.95;">${card.note}</div>` : '');
             
             // Kártya alaphelyzetbe állítása
             const cardEl = document.getElementById('current-flashcard');
@@ -1145,17 +1901,44 @@
         function updatePracticeList(card, add) {
             const key = 'angol_tanulo_practice_words';
             let list = JSON.parse(localStorage.getItem(key)) || [];
-            
+
             if (add) {
+                // Ha még nincs benne, adjuk hozzá; ha már van, frissítsük a megjegyzést
                 if (!list.some(c => c.en === card.en)) {
-                    list.push(card);
+                    list.push({ en: card.en || '', hu: card.hu || '', note: card.note || '' });
+                } else if (card.note) {
+                    list = list.map(c => c.en === card.en ? { ...c, note: card.note } : c);
                 }
             } else {
                 list = list.filter(c => c.en !== card.en);
             }
-            
+
             localStorage.setItem(key, JSON.stringify(list));
             updatePracticeCountUI();
+        }
+
+        function generatePracticeNote(enText, huText, level) {
+            // Keressünk egy releváns grammatikai szabályt az angol szövegben
+            let found = null;
+            for (const rule of grammarPatterns) {
+                if (!isGrammarRuleApplicable(rule, level)) continue;
+                try {
+                    if (rule.pattern.test(enText) || (huText && rule.pattern.test(huText))) {
+                        found = rule;
+                        break;
+                    }
+                } catch (e) {
+                    // regex hibák elkerülése
+                }
+            }
+
+            let note = '';
+            note += `Helyes válasz: ${huText || ''}`;
+            if (found) {
+                note += `<br><strong>Magyarázat:</strong> ${found.explanation || found.message}`;
+                if (found.link) note += ` <a href="${found.link}" target="_blank" rel="noopener">További magyarázat</a>`;
+            }
+            return note;
         }
 
         function updatePracticeCountUI() {
@@ -1165,6 +1948,117 @@
             if (countSpan) {
                 countSpan.innerText = list.length;
             }
+        }
+
+        // Gyakorlandó lista megjelenítése és kezelése
+        function showPractice() {
+            showScreen('practice-view');
+            renderPracticeList();
+        }
+
+        function renderPracticeList() {
+            const key = 'angol_tanulo_practice_words';
+            const list = JSON.parse(localStorage.getItem(key)) || [];
+            const container = document.getElementById('practice-list');
+            container.innerHTML = '';
+
+            if (list.length === 0) {
+                container.innerHTML = '<p>Nincsenek mentett tételek.</p>';
+                return;
+            }
+
+            list.forEach((c, idx) => {
+                const row = document.createElement('div');
+                row.className = 'practice-item';
+
+                const left = document.createElement('div');
+                left.style = 'flex:1; text-align:left;';
+                left.innerHTML = `<div style="font-weight:600;">${escapeHtml(c.en)}</div>` +
+                                 `<div style="color:#555; margin-top:6px;">${escapeHtml(c.hu || '')}</div>` +
+                                 `<div style="margin-top:8px; font-size:0.95em; color:#333;">${c.note || ''}</div>`;
+
+                const actions = document.createElement('div');
+                actions.className = 'practice-item-actions';
+
+                const btnPractice = document.createElement('button');
+                btnPractice.className = 'btn';
+                btnPractice.style = 'background-color:#4CAF50; padding:8px 10px;';
+                btnPractice.innerText = 'Gyakorlás';
+                btnPractice.onclick = () => practiceSingleItem(c.en);
+
+                const btnEdit = document.createElement('button');
+                btnEdit.className = 'btn btn-option';
+                btnEdit.style = 'padding:8px 10px;';
+                btnEdit.innerText = 'Szerkeszt megjegyzés';
+                btnEdit.onclick = () => editPracticeNote(c.en);
+
+                const btnRemove = document.createElement('button');
+                btnRemove.className = 'btn';
+                btnRemove.style = 'background-color:#f44336; padding:8px 10px;';
+                btnRemove.innerText = 'Törlés';
+                btnRemove.onclick = () => removePracticeItem(c.en);
+
+                actions.appendChild(btnPractice);
+                actions.appendChild(btnEdit);
+                actions.appendChild(btnRemove);
+
+                row.appendChild(left);
+                row.appendChild(actions);
+                container.appendChild(row);
+            });
+        }
+
+        function editPracticeNote(en) {
+            const key = 'angol_tanulo_practice_words';
+            const list = JSON.parse(localStorage.getItem(key)) || [];
+            const idx = list.findIndex(c => c.en === en);
+            if (idx === -1) return alert('Tétel nem található.');
+            const current = list[idx].note || '';
+            const res = prompt('Szerkeszd a megjegyzést (HTML engedélyezett):', current);
+            if (res === null) return; // Mégse
+            list[idx].note = res;
+            localStorage.setItem(key, JSON.stringify(list));
+            updatePracticeCountUI();
+            renderPracticeList();
+        }
+
+        function removePracticeItem(en) {
+            if (!confirm('Biztosan törlöd ezt a tételt a gyakorlandó listáról?')) return;
+            const key = 'angol_tanulo_practice_words';
+            let list = JSON.parse(localStorage.getItem(key)) || [];
+            list = list.filter(c => c.en !== en);
+            localStorage.setItem(key, JSON.stringify(list));
+            updatePracticeCountUI();
+            renderPracticeList();
+        }
+
+        function practiceSingleItem(en) {
+            const key = 'angol_tanulo_practice_words';
+            const list = JSON.parse(localStorage.getItem(key)) || [];
+            const item = list.find(c => c.en === en);
+            if (!item) return alert('Tétel nem található.');
+            currentFlashcards = [item];
+            flashcardDirection = 'hu-en';
+            fcIndex = 0;
+            fcScore = 0;
+            fcWrong = [];
+            showScreen('flashcards-view');
+            document.getElementById('fc-level-title').innerText = 'Gyakorlandó - Egy tétel';
+            renderFlashcard();
+        }
+
+        function clearPracticeList() {
+            if (!confirm('Biztosan törlöd az összes gyakorlandó tételt?')) return;
+            localStorage.removeItem('angol_tanulo_practice_words');
+            updatePracticeCountUI();
+            renderPracticeList();
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>\"']/g, function (s) {
+                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s];
+            });
         }
 
         function startPracticeFlashcards() {
@@ -1178,6 +2072,7 @@
             
             currentLevel = "Gyakorlandó";
             currentFlashcards = list;
+            flashcardDirection = 'hu-en';
             shuffleArray(currentFlashcards);
             
             fcIndex = 0;
@@ -1195,6 +2090,12 @@
             if (known) {
                 fcScore++;
                 updatePracticeList(currentCard, false);
+                try {
+                    const words = currentCard.en.split(' ').filter(w => w.length > 1).map(w => w.replace(/[.,!?;:]/g, ''));
+                    markWordsLearned(words);
+                } catch (e) {
+                    console.warn('Learned words update failed', e);
+                }
             } else {
                 fcWrong.push(currentCard);
                 updatePracticeList(currentCard, true);
@@ -1220,36 +2121,199 @@
             }
         }
 
-        function showVocabulary() {
-            showScreen('vocabulary-view');
-            
-            const container = document.getElementById('vocab-content');
-            container.innerHTML = '';
+        let vocabMode = 'byLevel';
+        let showOnlyNewWords = false;
 
-            for (const level in database) {
+        function showVocabulary(mode = 'byLevel') {
+            showScreen('vocabulary-view');
+            vocabMode = mode;
+            renderVocabulary();
+        }
+
+        function toggleFilterNewWords() {
+            showOnlyNewWords = !showOnlyNewWords;
+            const btn = document.getElementById('vocab-filter-btn');
+            if (btn) {
+                btn.innerText = showOnlyNewWords ? '🔎 Csak új szavak (ON)' : '🔎 Csak új szavak (OFF)';
+            }
+            renderVocabulary();
+        }
+
+        function toggleWordFamilies() {
+            vocabMode = 'families';
+            renderVocabulary();
+        }
+
+        function toggleVocabByLevel() {
+            vocabMode = 'byLevel';
+            renderVocabulary();
+        }
+
+        function toggleGrammarLessons() {
+            vocabMode = 'grammar';
+            renderVocabulary();
+        }
+
+        function getLearnedWords() {
+            return JSON.parse(localStorage.getItem('angol_tanulo_learned_words')) || [];
+        }
+
+        function saveLearnedWords(words) {
+            localStorage.setItem('angol_tanulo_learned_words', JSON.stringify(words));
+        }
+
+        function markWordsLearned(words) {
+            if (!Array.isArray(words)) words = [words];
+            const learned = new Set(getLearnedWords());
+            words.forEach(word => {
+                const clean = word.toString().toLowerCase().replace(/[.,!?;:]/g, '').trim();
+                if (clean) learned.add(clean);
+            });
+            saveLearnedWords(Array.from(learned));
+        }
+
+        function isWordLearned(word) {
+            const clean = word.toString().toLowerCase().replace(/[.,!?;:]/g, '').trim();
+            return getLearnedWords().includes(clean);
+        }
+
+        function extractVocabularyWords(level) {
+            const seen = new Set();
+            const words = [];
+
+            if (fallbackVocab[level]) {
+                fallbackVocab[level].forEach(item => {
+                    const clean = item.en.toLowerCase().replace(/[.,!?;:]/g, '').trim();
+                    if (clean && !seen.has(clean)) {
+                        seen.add(clean);
+                        words.push({ en: item.en, hu: item.hu || '', learned: isWordLearned(item.en) });
+                    }
+                });
+            }
+
+            if (database[level]) {
+                database[level].forEach(item => {
+                    if (!item.q.includes('___') && !item.q.includes('->') && !item.q.includes('?') && item.q.split(' ').length <= 3) {
+                        const clean = item.q.toLowerCase().replace(/[.,!?;:]/g, '').trim();
+                        if (clean && !seen.has(clean)) {
+                            seen.add(clean);
+                            words.push({ en: item.q, hu: item.options[item.a] || '', learned: isWordLearned(item.q) });
+                        }
+                    }
+                });
+            }
+
+            return words;
+        }
+
+        const grammarLessons = [
+            { title: 'Present Simple / Jelen egyszerű', levels: ['A1', 'A2'], description: 'A jelen egyszerűt használjuk szokások, tények és állapotok leírására. A he/she/it alany után az ige -s végződést kap.', examples: ['I like coffee.', 'She works every day.'], link: 'https://learnenglish.britishcouncil.org/grammar/english-grammar-reference/present-simple' },
+            { title: 'To be / Lenni ige', levels: ['A1', 'A2'], description: 'A to be ige különleges alakokat használ: am, is, are. Kérdésnél és tagadásnál is fontos a helyes forma.', examples: ['I am happy.', 'They are at school.'], link: 'https://learnenglish.britishcouncil.org/grammar/english-grammar-reference/to-be' },
+            { title: 'Past Simple / Múlt egyszerű', levels: ['A2', 'B1'], description: 'A múlt egyszerűt használjuk befejezett múltbeli eseményekhez. A rendhagyó igéknél külön formát kell megtanulni.', examples: ['I went to the cinema yesterday.', 'She bought a book.'], link: 'https://learnenglish.britishcouncil.org/grammar/english-grammar-reference/past-simple' },
+            { title: 'Present Perfect / Befejezett jelen', levels: ['B1', 'B2'], description: 'A present perfectet olyan eseményekhez használjuk, amelyek a múltban kezdődtek és hatással vannak a jelenre.', examples: ['I have lived here for ten years.', 'She has already eaten.'], link: 'https://learnenglish.britishcouncil.org/grammar/english-grammar-reference/present-perfect' },
+            { title: 'Conditionals / Feltételes mondatok', levels: ['B1', 'B2'], description: 'Az if-es szerkezetekkel lehetséges helyzeteket és következményeket írunk le. Az if részben a jelen időt, a főmondatban gyakran would-t használunk.', examples: ['If I had money, I would travel.', 'If it rains, we will stay home.'], link: 'https://learnenglish.britishcouncil.org/grammar/english-grammar-reference/conditionals' },
+            { title: 'Passive Voice / Passzív szerkezet', levels: ['B2', 'C1'], description: 'A passzív szerkezetet akkor használjuk, amikor a cselekvés elszenvedője fontosabb, mint a cselekvő.', examples: ['The letter was written by my friend.', 'The project is being completed now.'], link: 'https://learnenglish.britishcouncil.org/grammar/english-grammar-reference/passive-voice' }
+        ];
+
+        function renderVocabulary() {
+            const container = document.getElementById('vocab-content');
+            const info = document.getElementById('vocab-filter-info');
+            container.innerHTML = '';
+            let header = '';
+
+            if (vocabMode === 'families') {
+                header = '<h3>📚 Szócsaládok</h3><p style="color:#666; font-size:0.95em;">A szócsaládok segítenek látni, hogyan működnek a változó formák és a jelentésük.</p>';
+                container.innerHTML = header;
+                for (const base in wordFamilies) {
+                    const family = wordFamilies[base];
+                    const card = document.createElement('div');
+                    card.className = 'word-family-card';
+                    let formsHtml = '';
+                    family.forms_labeled.forEach(f => {
+                        formsHtml += `<span class="word-form"><strong>${f.word}</strong> (${f.pos})</span>`;
+                    });
+                    card.innerHTML = `
+                        <div class="word-family-title">🌳 ${base}</div>
+                        <div class="word-family-forms">${formsHtml}</div>
+                        <div class="word-family-example"><strong>Példák:</strong><br>${family.examples.map(e => '• ' + e).join('<br>')}</div>
+                    `;
+                    container.appendChild(card);
+                }
+                info.innerText = '';
+                return;
+            }
+
+            if (vocabMode === 'grammar') {
+                header = '<h3>🔤 Nyelvtani leckék</h3><p style="color:#666; font-size:0.95em;">Válassz egy témát, és tanulj egy fontos nyelvtani szabályt példákkal.</p>';
+                container.innerHTML = header;
+                grammarLessons.forEach(lesson => {
+                    const card = document.createElement('div');
+                    card.className = 'word-family-card';
+                    card.innerHTML = `
+                        <div class="word-family-title">${lesson.title}</div>
+                        <div style="color:#555; line-height:1.6;">${lesson.description}</div>
+                        <div style="margin:10px 0;">${lesson.examples.map(e => `<div>• ${e}</div>`).join('')}</div>
+                        <a href="${lesson.link}" target="_blank" style="color:#1976D2; text-decoration:underline;">További magyarázat</a>
+                    `;
+                    container.appendChild(card);
+                });
+                info.innerText = '';
+                return;
+            }
+
+            header = '<h3>📖 Szókincs szintenként</h3><p style="color:#666; font-size:0.95em;">A tanult és új szavak megjelenítése. A tanult szavakat zölddel, az újakat narancs színnel jelöljük.</p>';
+            container.innerHTML = header;
+            const learned = getLearnedWords();
+            let totalNew = 0;
+            let totalWords = 0;
+            
+            for (const level of ['A1','A2','B1','B2','C1','C2']) {
+                const words = extractVocabularyWords(level);
+                totalWords += words.length;
                 const levelHeader = document.createElement('div');
                 levelHeader.className = 'vocab-level-header';
-                levelHeader.innerText = level + " Szint";
+                levelHeader.innerText = level + ' Szint';
                 container.appendChild(levelHeader);
 
                 const table = document.createElement('table');
                 table.className = 'vocab-table';
-                table.innerHTML = `<thead><tr><th>Kérdés / Szó</th><th>Helyes válasz</th></tr></thead><tbody></tbody>`;
+                table.innerHTML = `<thead><tr><th>Angol</th><th>Magyar</th><th>Státusz</th></tr></thead><tbody></tbody>`;
                 const tbody = table.querySelector('tbody');
                 
-                database[level].forEach(item => {
+                let shown = 0;
+                words.forEach(item => {
+                    const status = item.learned ? 'Tanult' : 'Új';
+                    if (showOnlyNewWords && item.learned) return;
+                    if (!item.learned) totalNew++;
                     const row = document.createElement('tr');
-                    const correctAnswer = item.options[item.a];
-                    row.innerHTML = `<td>${item.q}</td><td style="font-weight:bold; color:#2e7d32;">${correctAnswer}</td>`;
+                    row.innerHTML = `<td>${item.en}</td><td>${item.hu}</td><td style="font-weight:bold; color:${item.learned ? '#2e7d32' : '#ff9800'};">${status}</td>`;
                     tbody.appendChild(row);
+                    shown++;
                 });
+                if (shown === 0) {
+                    const emptyRow = document.createElement('tr');
+                    emptyRow.innerHTML = `<td colspan="3" style="color:#777;">Nincs megjeleníthető szó ebben a kategóriában.</td>`;
+                    tbody.appendChild(emptyRow);
+                }
                 container.appendChild(table);
             }
+            info.innerText = `Összesen ${totalWords} szó, ebből ${totalNew} új szó (nem tanult).`;
+        }
+
+        function refreshVocabularyView() {
+            if (document.getElementById('vocabulary-view').classList.contains('hidden')) {
+                showScreen('vocabulary-view');
+            }
+            const filterBtn = document.getElementById('vocab-filter-btn');
+            if (filterBtn) {
+                filterBtn.innerText = showOnlyNewWords ? '🔎 Csak új szavak (ON)' : '🔎 Csak új szavak (OFF)';
+            }
+            renderVocabulary();
         }
 
         // Képernyőváltó segédfüggvény
         function showScreen(screenId) {
-            const screens = ['menu', 'quiz', 'reading-practice', 'sentence-builder', 'vocabulary-view', 'flashcards-view'];
+            const screens = ['menu', 'quiz', 'reading-practice', 'sentence-builder', 'writing-practice', 'vocabulary-view', 'flashcards-view', 'practice-view', 'placement-test', 'placement-result'];
             screens.forEach(id => document.getElementById(id).classList.add('hidden'));
             
             const target = document.getElementById(screenId);
@@ -1269,11 +2333,21 @@
             let stats = JSON.parse(localStorage.getItem(key)) || {};
             
             if (!stats[level]) {
-                stats[level] = { best: 0, last: 0, total: total };
+                stats[level] = { best: 0, last: 0, total: total, attempts: 0, average: 0 };
             }
             
             stats[level].last = score;
-            stats[level].total = total; // Frissítjük a kérdések számát, ha változna
+            stats[level].total = total;
+            stats[level].attempts = (stats[level].attempts || 0) + 1;
+            
+            // Átlag kiszámítása
+            if (stats[level].attempts === 1) {
+                stats[level].average = score;
+            } else {
+                const oldAvg = stats[level].average || score;
+                stats[level].average = (oldAvg * (stats[level].attempts - 1) + score) / stats[level].attempts;
+            }
+            
             if (score > stats[level].best) {
                 stats[level].best = score;
             }
@@ -1306,6 +2380,308 @@
             if(confirm('Biztosan törölni szeretnéd az eredményeket?')) {
                 localStorage.removeItem('angol_tanulo_stats');
                 updateStatsUI();
+            }
+        }
+
+        // ============= SZINTFELMÉRÉS TESZT =============
+        const placementQuestions = [
+            // A1 szint (1-10)
+            { q: "My name ___ Peter.", options: ["is", "are", "am"], a: 0, level: "A1" },
+            { q: "How are ___?", options: ["you", "I", "we"], a: 0, level: "A1" },
+            { q: "I ___ from Hungary.", options: ["am", "is", "are"], a: 0, level: "A1" },
+            { q: "She ___ a teacher.", options: ["is", "are", "am"], a: 0, level: "A1" },
+            { q: "What is your ___?", options: ["name", "names", "named"], a: 0, level: "A1" },
+            { q: "I like ___.", options: ["coffee", "coffees", "to coffee"], a: 0, level: "A1" },
+            { q: "Do you have a ___?", options: ["dog", "dogs", "dogging"], a: 0, level: "A1" },
+            { q: "They ___ students.", options: ["are", "is", "am"], a: 0, level: "A1" },
+            { q: "I ___ 25 years old.", options: ["am", "is", "are"], a: 0, level: "A1" },
+            { q: "Where ___ you from?", options: ["are", "is", "am"], a: 0, level: "A1" },
+            // A2 szint (11-20)\n            { q: "I ___ to school yesterday.", options: ["went", "go", "goes"], a: 0, level: "A2" },
+            { q: "She has ___ working here.", options: ["been", "be", "was"], a: 0, level: "A2" },
+            { q: "When I arrived, they ___ dinner.", options: ["were eating", "are eating", "eat"], a: 0, level: "A2" },
+            { q: "If I had more time, I ___ play tennis.", options: ["would", "will", "do"], a: 0, level: "A2" },
+            { q: "The book ___ on the table.", options: ["was lying", "were lying", "was lied"], a: 0, level: "A2" },
+            { q: "I have lived here ___ five years.", options: ["for", "since", "during"], a: 0, level: "A2" },
+            { q: "___ you like coffee?", options: ["Do", "Does", "Are"], a: 0, level: "A2" },
+            { q: "He ___ me to come early.", options: ["asked", "asks", "asking"], a: 0, level: "A2" },
+            { q: "I'm tired ___ waiting.", options: ["of", "from", "in"], a: 0, level: "A2" },
+            { q: "Would you like ___ water?", options: ["some", "any", "a"], a: 0, level: "A2" },
+            // B1 szint (21-30)
+            { q: "If I had studied harder, I ___ the exam.", options: ["would have passed", "will pass", "would pass"], a: 0, level: "B1" },
+            { q: "She said that she ___ very tired.", options: ["was", "is", "has been"], a: 0, level: "B1" },
+            { q: "The Mona Lisa ___ by Leonardo da Vinci.", options: ["was painted", "painted", "was painting"], a: 0, level: "B1" },
+            { q: "By next year, I ___ English for five years.", options: ["will have studied", "have studied", "will study"], a: 0, level: "B1" },
+            { q: "He enjoyes ___ books in his free time.", options: ["reading", "to read", "read"], a: 0, level: "B1" },
+            { q: "The woman ___ lives next door is a doctor.", options: ["who", "that", "which"], a: 0, level: "B1" },
+            { q: "I can't put ___ with his rude behavior anymore.", options: ["up", "off", "on"], a: 0, level: "B1" },
+            { q: "You won't pass the exam ___ you study harder.", options: ["unless", "if", "when"], a: 0, level: "B1" },
+            { q: "I wish I ___ more free time.", options: ["had", "have", "would have"], a: 0, level: "B1" },
+            { q: "It's a beautiful day, ___?", options: ["isn't it", "is it", "isn't that"], a: 0, level: "B1" },
+            // B2 szint (31-40)\n            { q: "Despite ___ that he was tired, he continued working.", options: ["knowing", "know", "to know"], a: 0, level: "B2" },
+            { q: "The impact of social media on teenagers ___ widely debated.", options: ["is", "has been", "be"], a: 0, level: "B2" },
+            { q: "She argued that climate change ___ the most pressing issue.", options: ["was", "were", "is"], a: 0, level: "B2" },
+            { q: "Had I known about the meeting, I ___ come.", options: ["would have", "will", "would"], a: 0, level: "B2" },
+            { q: "The evidence ___ that his claims were false.", options: ["suggested", "suggests", "is suggested"], a: 0, level: "B2" },
+            { q: "Students should be ___ to think critically about information.", options: ["encouraged", "encourage", "encouraging"], a: 0, level: "B2" },
+            { q: "The government must regulate social media ___ protect users.", options: ["to", "so as to", "in order to"], a: 0, level: "B2" },
+            { q: "Remote work has ___ increasingly popular in recent years.", options: ["become", "been becoming", "become becoming"], a: 0, level: "B2" },
+            { q: "___ the regulations, companies still need to innovate responsibly.", options: ["Despite", "Though", "Although"], a: 0, level: "B2" },
+            { q: "The phenomenon can be ___ as a shift in work culture.", options: ["characterized", "characterizing", "characterize"], a: 0, level: "B2" },
+            // C1 szint (41-50)\n            { q: "The ubiquity of social media has transformed ___ people communicate.", options: ["how", "in which way", "the way in which"], a: 0, level: "C1" },
+            { q: "Given the social and economic power wielded by these platforms, ___ is a compelling argument for regulation.", options: ["there", "it", "that"], a: 0, level: "C1" },
+            { q: "The market failures and negative externalities are not resolved by market forces ___.", options: ["alone", "only", "merely"], a: 0, level: "C1" },
+            { q: "Platforms benefit from network effects that ___ market dominance.", options: ["entrench", "entrench", "entrenching"], a: 0, level: "C1" },
+            { q: "Without oversight, users can be damaged by unchecked ___ campaigns.", options: ["misinformation", "misinformed", "misinform"], a: 0, level: "C1" },
+            { q: "Demographic ageing presents complex ___ and economic challenges.", options: ["cultural", "culture", "culturally"], a: 0, level: "C1" },
+            { q: "An ageing population reshapes labour markets, ___ finances and social norms.", options: ["public", "publicly", "publicize"], a: 0, level: "C1" },
+            { q: "Policymakers must formulate integrated strategies that ___ fiscal sustainability.", options: ["maintain", "maintain", "maintaining"], a: 0, level: "C1" },
+            { q: "Older cohorts tend to spend more on health and housing adaptations, ___ on durable goods.", options: ["and less", "but less", "rather less"], a: 0, level: "C1" },
+            { q: "Economically, an ageing population affects both the supply and demand ___.", options: ["sides", "side", "side-wise"], a: 0, level: "C1" }
+        ];
+
+        let ptIndex = 0, ptScore = 0, ptAnswers = [];
+
+        function startPlacementTest() {
+            ptIndex = 0; ptScore = 0; ptAnswers = [];
+            showScreen('placement-test');
+            renderPlacementQuestion();
+        }
+
+        function renderPlacementQuestion() {
+            if (ptIndex >= placementQuestions.length) {
+                showPlacementResult();
+                return;
+            }
+            
+            const q = placementQuestions[ptIndex];
+            document.getElementById('pt-q-num').innerText = ptIndex + 1;
+            document.getElementById('pt-q-total').innerText = placementQuestions.length;
+            document.getElementById('pt-question').innerText = q.q;
+            document.getElementById('pt-feedback').innerText = '';
+            document.getElementById('pt-score-bar').style.width = ((ptIndex / placementQuestions.length) * 100) + '%';
+            document.getElementById('pt-next-btn').classList.add('hidden');
+            
+            const optionsDiv = document.getElementById('pt-options');
+            optionsDiv.innerHTML = '';
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-option';
+                btn.innerText = opt;
+                btn.onclick = () => selectPlacementAnswer(i, q.a, opt);
+                optionsDiv.appendChild(btn);
+            });
+        }
+
+        function selectPlacementAnswer(selected, correct, text) {
+            const q = placementQuestions[ptIndex];
+            ptAnswers.push({ q: q.q, selected: selected, correct: correct, level: q.level, correct: q.a });
+            
+            if (selected === correct) {
+                ptScore++;
+                document.getElementById('pt-feedback').innerHTML = '<span class="correct">✓ Helyes!</span>';
+            } else {
+                document.getElementById('pt-feedback').innerHTML = '<span class="wrong">✗ Hibás. Helyes válasz: ' + q.options[correct] + '</span>';
+            }
+            
+            document.getElementById('pt-next-btn').classList.remove('hidden');
+        }
+
+        function nextPlacementQuestion() {
+            ptIndex++;
+            renderPlacementQuestion();
+        }
+
+        function speakPlacementQuestion() {
+            const q = placementQuestions[ptIndex];
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(q.q);
+                utterance.lang = 'en-US';
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function showPlacementResult() {
+            showScreen('placement-result');
+            const percentage = (ptScore / placementQuestions.length) * 100;
+            document.getElementById('pr-score').innerText = ptScore + '/' + placementQuestions.length;
+            document.getElementById('pr-score-bar').style.width = percentage + '%';
+            
+            let level, desc, recs;
+            if (percentage >= 90) {
+                level = 'C1-C2'; desc = 'Nagyon magas szint! Profi angol felhasználó vagy. Az C1-C2 szint kihívásokra fordulj.';
+                recs = ['Próbálj meg nagyon összetett szövegeket olvasni (akadémiai cikkek, irodalom)', 'Fejleszd a szó árnyalati értékeit és idiomatikus kifejezéseket', 'Gyakorolj szinkronizálást (simultán szövegértés)'];
+            } else if (percentage >= 75) {
+                level = 'B2'; desc = 'Felső középszint! Jól megy az angol. A B2 szinten alaposabban dolgozhatsz.';
+                recs = ['Összefüggő szövegek olvasása (novellák, cikkek)', 'Beszélgetési gyakorlatok, kifejezésgyüjtemény', 'Nyelvtani finomhangolás'];
+            } else if (percentage >= 60) {
+                level = 'B1'; desc = 'Középszint! Jó alapok vannak. Gyakorlásra van szükséged.';
+                recs = ['Szöveges gyakorlatok napi alapon', 'Szókincs bővítése (2000+ szó)', 'Nyelvtani szerkezetek gyakorlása'];
+            } else if (percentage >= 40) {
+                level = 'A2'; desc = 'Kezdő-középszint. Kezd belépni az angol világba! További gyakorlásra van szükséged.';
+                recs = ['Alapvető szókincs (1000 szó) elsajátítása', 'Egyszerű mondatok gyakorlása', 'Hangos olvasás napi 15 perc'];
+            } else {
+                level = 'A1'; desc = 'Kezdő szint. Remek kezdetnek! Lassan építs fel az alapokra.';
+                recs = ['Nagyon alapvető szókincs tanulása', 'Egyszerű frázák (Hello, How are you?)', 'Kiejtésgyakorlat'];
+            }
+            
+            document.getElementById('pr-level').innerText = level;
+            document.getElementById('pr-description').innerText = desc;
+            const recList = document.getElementById('pr-recommendations');
+            recList.innerHTML = '';
+            recs.forEach(r => {
+                const li = document.createElement('li');
+                li.innerText = r;
+                recList.appendChild(li);
+            });
+        }
+
+        // ============= SZÓCSALÁDOK ADATBÁZIS =============
+        const wordFamilies = {
+            'play': {
+                forms: ['play', 'plays', 'played', 'playing', 'player', 'played'],
+                pos: 'verb',
+                forms_labeled: [
+                    { word: 'play', pos: 'verb (alak)' },
+                    { word: 'plays', pos: 'verb (3sz sg)' },
+                    { word: 'playing', pos: 'gerund' },
+                    { word: 'played', pos: 'verb (múlt)' },
+                    { word: 'player', pos: 'noun' },
+                    { word: 'playground', pos: 'noun' }
+                ],
+                examples: ['I play football', 'He plays guitar', 'She is playing', 'They played yesterday', 'He is a good player']
+            },
+            'teach': {
+                forms: ['teach', 'teaches', 'taught', 'teaching', 'teacher', 'taught'],
+                pos: 'verb',
+                forms_labeled: [
+                    { word: 'teach', pos: 'verb (alak)' },
+                    { word: 'teaches', pos: 'verb (3sz sg)' },
+                    { word: 'teaching', pos: 'gerund' },
+                    { word: 'taught', pos: 'verb (múlt)' },
+                    { word: 'teacher', pos: 'noun' },
+                    { word: 'teaching', pos: 'noun' }
+                ],
+                examples: ['I teach English', 'She teaches math', 'He is teaching', 'They taught well', 'She is a great teacher']
+            },
+            'work': {
+                forms: ['work', 'works', 'worked', 'working', 'worker', 'workplace'],
+                pos: 'verb',
+                forms_labeled: [
+                    { word: 'work', pos: 'verb (alak)' },
+                    { word: 'works', pos: 'verb (3sz sg)' },
+                    { word: 'working', pos: 'gerund' },
+                    { word: 'worked', pos: 'verb (múlt)' },
+                    { word: 'worker', pos: 'noun' },
+                    { word: 'workplace', pos: 'noun' }
+                ],
+                examples: ['I work hard', 'She works in an office', 'They are working', 'He worked there', 'She is a good worker']
+            },
+            'learn': {
+                forms: ['learn', 'learns', 'learned', 'learning', 'learner', 'knowledge'],
+                pos: 'verb',
+                forms_labeled: [
+                    { word: 'learn', pos: 'verb (alak)' },
+                    { word: 'learns', pos: 'verb (3sz sg)' },
+                    { word: 'learning', pos: 'gerund' },
+                    { word: 'learned', pos: 'verb (múlt)' },
+                    { word: 'learner', pos: 'noun' }
+                ],
+                examples: ['I learn English', 'She learns fast', 'They are learning', 'He learned well', 'She is a quick learner']
+            },
+            'speak': {
+                forms: ['speak', 'speaks', 'spoke', 'speaking', 'speaker', 'speech'],
+                pos: 'verb',
+                forms_labeled: [
+                    { word: 'speak', pos: 'verb (alak)' },
+                    { word: 'speaks', pos: 'verb (3sz sg)' },
+                    { word: 'speaking', pos: 'gerund' },
+                    { word: 'spoke', pos: 'verb (múlt)' },
+                    { word: 'speaker', pos: 'noun' },
+                    { word: 'speech', pos: 'noun' }
+                ],
+                examples: ['I speak English', 'He speaks three languages', 'She is speaking', 'They spoke yesterday', 'She is a good speaker']
+            }
+        };
+
+        let showingWordFamilies = false;
+
+        function toggleWordFamilies() {
+            showingWordFamilies = !showingWordFamilies;
+            if (showingWordFamilies) {
+                renderWordFamilies();
+            } else {
+                toggleVocabByLevel();
+            }
+        }
+
+        function toggleVocabByLevel() {
+            showingWordFamilies = false;
+            showVocabulary();
+        }
+
+        function renderWordFamilies() {
+            const vocabContent = document.getElementById('vocab-content');
+            vocabContent.innerHTML = '<h3>📚 Szócsaládok (Word Families)</h3><p style="color: #666; font-size: 0.9em;">A szócsaládok az alapszót és annak variációit mutatják.</p>';
+            
+            for (const base in wordFamilies) {
+                const family = wordFamilies[base];
+                const card = document.createElement('div');
+                card.className = 'word-family-card';
+                
+                let formsHtml = '';
+                family.forms_labeled.forEach(f => {
+                    formsHtml += `<span class="word-form"><strong>${f.word}</strong> (${f.pos})</span>`;
+                });
+                
+                card.innerHTML = `
+                    <div class="word-family-title">🌳 ${base}</div>
+                    <div class="word-family-forms">${formsHtml}</div>
+                    <div class="word-family-example">
+                        <strong>Példák:</strong><br>
+                        ${family.examples.map(e => '• ' + e).join('<br>')}
+                    </div>
+                `;
+                vocabContent.appendChild(card);
+            }
+        }
+
+        // ============= STATISZTIKA FEJLESZTÉS =============
+        function updateStatsUI() {
+            const key = 'angol_tanulo_stats';
+            const stats = JSON.parse(localStorage.getItem(key)) || {};
+            const list = document.getElementById('stats-list');
+            list.innerHTML = '';
+            
+            if (Object.keys(stats).length === 0) {
+                list.innerHTML = '<li>Még nincs mentett eredmény.</li>';
+                return;
+            }
+
+            for (const level in stats) {
+                const data = stats[level];
+                const percentage = Math.round((data.best / data.total) * 100);
+                const avg = data.average ? Math.round(data.average) : data.last;
+                
+                const li = document.createElement('li');
+                li.style.marginBottom = '12px';
+                li.style.padding = '12px';
+                li.style.backgroundColor = '#f9f9f9';
+                li.style.borderRadius = '8px';
+                li.style.borderLeft = '4px solid #4CAF50';
+                
+                li.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-weight: bold; color: #4CAF50; font-size: 1.1em;">${level}</span>
+                        <span style="font-weight: 600; color: #333;">Legjobb: ${data.best}/${data.total} <strong style="color: #4CAF50;">${percentage}%</strong></span>
+                    </div>
+                    <div style="font-size: 0.85em; color: #777;">
+                        <span>📊 Utolsó: ${data.last}/${data.total} | </span>
+                        <span>📈 Átlag: ~${avg}/${data.total} | </span>
+                        <span>🔢 Próbálkozások: ${data.attempts || 1}</span>
+                    </div>
+                `;
+                list.appendChild(li);
             }
         }
 
