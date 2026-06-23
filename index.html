@@ -2385,7 +2385,6 @@
 
         // ============= SZINTFELMÉRÉS TESZT =============
         const placementQuestions = [
-            // A1 szint (1-10)
             { q: "My name ___ Peter.", options: ["is", "are", "am"], a: 0, level: "A1" },
             { q: "How are ___?", options: ["you", "I", "we"], a: 0, level: "A1" },
             { q: "I ___ from Hungary.", options: ["am", "is", "are"], a: 0, level: "A1" },
@@ -2396,7 +2395,7 @@
             { q: "They ___ students.", options: ["are", "is", "am"], a: 0, level: "A1" },
             { q: "I ___ 25 years old.", options: ["am", "is", "are"], a: 0, level: "A1" },
             { q: "Where ___ you from?", options: ["are", "is", "am"], a: 0, level: "A1" },
-            // A2 szint (11-20)\n            { q: "I ___ to school yesterday.", options: ["went", "go", "goes"], a: 0, level: "A2" },
+            { q: "I ___ to school yesterday.", options: ["went", "go", "goes"], a: 0, level: "A2" },
             { q: "She has ___ working here.", options: ["been", "be", "was"], a: 0, level: "A2" },
             { q: "When I arrived, they ___ dinner.", options: ["were eating", "are eating", "eat"], a: 0, level: "A2" },
             { q: "If I had more time, I ___ play tennis.", options: ["would", "will", "do"], a: 0, level: "A2" },
@@ -2406,35 +2405,34 @@
             { q: "He ___ me to come early.", options: ["asked", "asks", "asking"], a: 0, level: "A2" },
             { q: "I'm tired ___ waiting.", options: ["of", "from", "in"], a: 0, level: "A2" },
             { q: "Would you like ___ water?", options: ["some", "any", "a"], a: 0, level: "A2" },
-            // B1 szint (21-30)
             { q: "If I had studied harder, I ___ the exam.", options: ["would have passed", "will pass", "would pass"], a: 0, level: "B1" },
             { q: "She said that she ___ very tired.", options: ["was", "is", "has been"], a: 0, level: "B1" },
             { q: "The Mona Lisa ___ by Leonardo da Vinci.", options: ["was painted", "painted", "was painting"], a: 0, level: "B1" },
             { q: "By next year, I ___ English for five years.", options: ["will have studied", "have studied", "will study"], a: 0, level: "B1" },
-            { q: "He enjoyes ___ books in his free time.", options: ["reading", "to read", "read"], a: 0, level: "B1" },
-            { q: "The woman ___ lives next door is a doctor.", options: ["who", "that", "which"], a: 0, level: "B1" },
+            { q: "He enjoys ___ books in his free time.", options: ["reading", "to read", "read"], a: 0, level: "B1" },
+            { q: "The woman ___ lives next door is a doctor.", options: ["who", "which", "whose"], a: 0, level: "B1" },
             { q: "I can't put ___ with his rude behavior anymore.", options: ["up", "off", "on"], a: 0, level: "B1" },
             { q: "You won't pass the exam ___ you study harder.", options: ["unless", "if", "when"], a: 0, level: "B1" },
             { q: "I wish I ___ more free time.", options: ["had", "have", "would have"], a: 0, level: "B1" },
             { q: "It's a beautiful day, ___?", options: ["isn't it", "is it", "isn't that"], a: 0, level: "B1" },
-            // B2 szint (31-40)\n            { q: "Despite ___ that he was tired, he continued working.", options: ["knowing", "know", "to know"], a: 0, level: "B2" },
-            { q: "The impact of social media on teenagers ___ widely debated.", options: ["is", "has been", "be"], a: 0, level: "B2" },
-            { q: "She argued that climate change ___ the most pressing issue.", options: ["was", "were", "is"], a: 0, level: "B2" },
+            { q: "Despite ___ that he was tired, he continued working.", options: ["knowing", "know", "to know"], a: 0, level: "B2" },
+            { q: "The impact of social media on teenagers ___ widely debated.", options: ["is", "are", "be"], a: 0, level: "B2" },
+            { q: "She argued that climate change ___ the most pressing issue.", options: ["was", "were", "been"], a: 0, level: "B2" },
             { q: "Had I known about the meeting, I ___ come.", options: ["would have", "will", "would"], a: 0, level: "B2" },
             { q: "The evidence ___ that his claims were false.", options: ["suggested", "suggests", "is suggested"], a: 0, level: "B2" },
             { q: "Students should be ___ to think critically about information.", options: ["encouraged", "encourage", "encouraging"], a: 0, level: "B2" },
-            { q: "The government must regulate social media ___ protect users.", options: ["to", "so as to", "in order to"], a: 0, level: "B2" },
+            { q: "The government must regulate social media ___ protect users.", options: ["to", "for", "with"], a: 0, level: "B2" },
             { q: "Remote work has ___ increasingly popular in recent years.", options: ["become", "been becoming", "become becoming"], a: 0, level: "B2" },
             { q: "___ the regulations, companies still need to innovate responsibly.", options: ["Despite", "Though", "Although"], a: 0, level: "B2" },
             { q: "The phenomenon can be ___ as a shift in work culture.", options: ["characterized", "characterizing", "characterize"], a: 0, level: "B2" },
-            // C1 szint (41-50)\n            { q: "The ubiquity of social media has transformed ___ people communicate.", options: ["how", "in which way", "the way in which"], a: 0, level: "C1" },
+            { q: "The ubiquity of social media has transformed ___ people communicate.", options: ["how", "which", "what"], a: 0, level: "C1" },
             { q: "Given the social and economic power wielded by these platforms, ___ is a compelling argument for regulation.", options: ["there", "it", "that"], a: 0, level: "C1" },
-            { q: "The market failures and negative externalities are not resolved by market forces ___.", options: ["alone", "only", "merely"], a: 0, level: "C1" },
-            { q: "Platforms benefit from network effects that ___ market dominance.", options: ["entrench", "entrench", "entrenching"], a: 0, level: "C1" },
+            { q: "The market failures and negative externalities are not resolved by market forces ___.", options: ["alone", "lonely", "alones"], a: 0, level: "C1" },
+            { q: "Platforms benefit from network effects that ___ market dominance.", options: ["entrench", "entrenches", "entrenching"], a: 0, level: "C1" },
             { q: "Without oversight, users can be damaged by unchecked ___ campaigns.", options: ["misinformation", "misinformed", "misinform"], a: 0, level: "C1" },
             { q: "Demographic ageing presents complex ___ and economic challenges.", options: ["cultural", "culture", "culturally"], a: 0, level: "C1" },
             { q: "An ageing population reshapes labour markets, ___ finances and social norms.", options: ["public", "publicly", "publicize"], a: 0, level: "C1" },
-            { q: "Policymakers must formulate integrated strategies that ___ fiscal sustainability.", options: ["maintain", "maintain", "maintaining"], a: 0, level: "C1" },
+            { q: "Policymakers must formulate integrated strategies that ___ fiscal sustainability.", options: ["maintain", "maintains", "maintaining"], a: 0, level: "C1" },
             { q: "Older cohorts tend to spend more on health and housing adaptations, ___ on durable goods.", options: ["and less", "but less", "rather less"], a: 0, level: "C1" },
             { q: "Economically, an ageing population affects both the supply and demand ___.", options: ["sides", "side", "side-wise"], a: 0, level: "C1" }
         ];
@@ -2463,23 +2461,41 @@
             
             const optionsDiv = document.getElementById('pt-options');
             optionsDiv.innerHTML = '';
-            q.options.forEach((opt, i) => {
+            
+            // Shuffle the options to make sure correct answer is not always first
+            const indices = q.options.map((_, i) => i);
+            shuffleArray(indices);
+            
+            indices.forEach(idx => {
+                const opt = q.options[idx];
                 const btn = document.createElement('button');
                 btn.className = 'btn btn-option';
                 btn.innerText = opt;
-                btn.onclick = () => selectPlacementAnswer(i, q.a, opt);
+                btn.onclick = () => selectPlacementAnswer(idx, q.a, opt, btn);
                 optionsDiv.appendChild(btn);
             });
         }
 
-        function selectPlacementAnswer(selected, correct, text) {
+        function selectPlacementAnswer(selected, correct, text, btnElement) {
+            // Disable all option buttons to prevent multiple clicks
+            const buttons = document.querySelectorAll('#pt-options .btn-option');
+            buttons.forEach(b => b.disabled = true);
+            
             const q = placementQuestions[ptIndex];
-            ptAnswers.push({ q: q.q, selected: selected, correct: correct, level: q.level, correct: q.a });
+            ptAnswers.push({ q: q.q, selected: selected, correct: correct, level: q.level });
             
             if (selected === correct) {
                 ptScore++;
+                if (btnElement) {
+                    btnElement.style.backgroundColor = '#4CAF50';
+                    btnElement.style.color = 'white';
+                }
                 document.getElementById('pt-feedback').innerHTML = '<span class="correct">✓ Helyes!</span>';
             } else {
+                if (btnElement) {
+                    btnElement.style.backgroundColor = '#f44336';
+                    btnElement.style.color = 'white';
+                }
                 document.getElementById('pt-feedback').innerHTML = '<span class="wrong">✗ Hibás. Helyes válasz: ' + q.options[correct] + '</span>';
             }
             
